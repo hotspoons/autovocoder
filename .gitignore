@@ -1,0 +1,29 @@
+# Rust
+/target/
+**/*.rs.bk
+Cargo.lock.bak
+
+# LV2 build artifacts
+*.lv2/
+*.so
+*.dylib
+*.dll
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Profiling / debug
+*.profraw
+perf.data*
+flamegraph.svg
+
+# Audio test artifacts
+/renders/
+*.wav.tmp

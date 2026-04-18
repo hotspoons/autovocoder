@@ -1,0 +1,27 @@
+[package]
+name = "autovocoder-standalone"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "Standalone app for the autovocoder."
+
+[[bin]]
+name = "autovocoder"
+path = "src/main.rs"
+
+[features]
+# Opt-in live audio (mic → autovocoder → speakers via cpal). Off by default
+# so the Linux dev build doesn't need alsa-dev headers. Enabled for macOS
+# cross-builds via the `just mac-*` recipes.
+default = []
+live = ["dep:cpal", "dep:ringbuf", "dep:ctrlc"]
+
+[dependencies]
+autovocoder-dsp.workspace = true
+hound.workspace = true
+clap.workspace = true
+anyhow.workspace = true
+cpal = { version = "0.15", optional = true }
+ringbuf = { version = "0.4", optional = true }
+ctrlc = { version = "3", optional = true }

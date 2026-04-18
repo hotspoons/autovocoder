@@ -1,0 +1,13 @@
+[package]
+name = "autovocoder-lv2"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "LV2 plugin wrapper for the autovocoder."
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+autovocoder-dsp.workspace = true

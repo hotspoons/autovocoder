@@ -1,0 +1,14 @@
+[package]
+name = "autovocoder-wasm"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "WebAssembly bindings for the autovocoder (AudioWorklet-friendly)."
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+autovocoder-dsp.workspace = true
+wasm-bindgen.workspace = true

@@ -1,0 +1,57 @@
+@prefix lv2:  <http://lv2plug.in/ns/lv2core#> .
+@prefix pset: <http://lv2plug.in/ns/ext/presets#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<https://github.com/richsio/autovocoder>
+    a lv2:Plugin ;
+    lv2:binary <libautovocoder_lv2.so> ;
+    rdfs:seeAlso <autovocoder.ttl> .
+
+# Register every preset in presets.ttl so hosts discover them.
+# Each entry says "here is a Preset that applies to our plugin, its
+# details are in presets.ttl."
+
+<https://github.com/richsio/autovocoder#preset/soundwave_c2>
+    a pset:Preset ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    rdfs:seeAlso <presets.ttl> .
+
+<https://github.com/richsio/autovocoder#preset/soundwave_c3>
+    a pset:Preset ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    rdfs:seeAlso <presets.ttl> .
+
+<https://github.com/richsio/autovocoder#preset/chromatic_robot>
+    a pset:Preset ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    rdfs:seeAlso <presets.ttl> .
+
+<https://github.com/richsio/autovocoder#preset/in_key_c_major>
+    a pset:Preset ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    rdfs:seeAlso <presets.ttl> .
+
+<https://github.com/richsio/autovocoder#preset/in_key_a_minor>
+    a pset:Preset ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    rdfs:seeAlso <presets.ttl> .
+
+<https://github.com/richsio/autovocoder#preset/dark_choir_am>
+    a pset:Preset ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    rdfs:seeAlso <presets.ttl> .
+
+<https://github.com/richsio/autovocoder#preset/bright_angels_c>
+    a pset:Preset ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    rdfs:seeAlso <presets.ttl> .
+
+<https://github.com/richsio/autovocoder#preset/heavy_glide>
+    a pset:Preset ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    rdfs:seeAlso <presets.ttl> .
+
+<https://github.com/richsio/autovocoder#preset/subtle_support>
+    a pset:Preset ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    rdfs:seeAlso <presets.ttl> .

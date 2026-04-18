@@ -1,0 +1,133 @@
+@prefix lv2:  <http://lv2plug.in/ns/lv2core#> .
+@prefix pset: <http://lv2plug.in/ns/ext/presets#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# Each preset is an rdf:type pset:Preset whose `pset:appliesTo` is our
+# plugin URI. Ports are referenced by `lv2:symbol` and given a value.
+# Hosts display these in the plugin's preset picker.
+
+<https://github.com/richsio/autovocoder#preset/soundwave_c2>
+    a pset:Preset ;
+    rdfs:label "Soundwave (C2 / low)" ;
+    rdfs:comment "Classic menacing Decepticon. Fixed low C, fully wet, stock portamento." ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:port
+        [ lv2:symbol "mode"          ; pset:value 3   ] ,
+        [ lv2:symbol "fixed_note"    ; pset:value 36  ] ,
+        [ lv2:symbol "scale"         ; pset:value 0   ] ,
+        [ lv2:symbol "scale_root"    ; pset:value 0   ] ,
+        [ lv2:symbol "mix"           ; pset:value 1.0 ] ,
+        [ lv2:symbol "portamento"    ; pset:value 25.0 ] ,
+        [ lv2:symbol "carrier_level" ; pset:value 0.6 ] .
+
+<https://github.com/richsio/autovocoder#preset/soundwave_c3>
+    a pset:Preset ;
+    rdfs:label "Soundwave (C3 / neutral)" ;
+    rdfs:comment "The canonical Soundwave register — C3 fixed, chromatic, fully wet." ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:port
+        [ lv2:symbol "mode"          ; pset:value 3   ] ,
+        [ lv2:symbol "fixed_note"    ; pset:value 48  ] ,
+        [ lv2:symbol "scale"         ; pset:value 0   ] ,
+        [ lv2:symbol "scale_root"    ; pset:value 0   ] ,
+        [ lv2:symbol "mix"           ; pset:value 1.0 ] ,
+        [ lv2:symbol "portamento"    ; pset:value 25.0 ] ,
+        [ lv2:symbol "carrier_level" ; pset:value 0.6 ] .
+
+<https://github.com/richsio/autovocoder#preset/chromatic_robot>
+    a pset:Preset ;
+    rdfs:label "Chromatic Robot" ;
+    rdfs:comment "Tracks the singer's pitch on a chromatic grid. Snappy portamento for a mechanical feel." ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:port
+        [ lv2:symbol "mode"          ; pset:value 0   ] ,
+        [ lv2:symbol "fixed_note"    ; pset:value 48  ] ,
+        [ lv2:symbol "scale"         ; pset:value 0   ] ,
+        [ lv2:symbol "scale_root"    ; pset:value 0   ] ,
+        [ lv2:symbol "mix"           ; pset:value 1.0 ] ,
+        [ lv2:symbol "portamento"    ; pset:value 8.0 ] ,
+        [ lv2:symbol "carrier_level" ; pset:value 0.6 ] .
+
+<https://github.com/richsio/autovocoder#preset/in_key_c_major>
+    a pset:Preset ;
+    rdfs:label "In Key — C Major" ;
+    rdfs:comment "Follows pitch but snaps to C major. Sing wrong, sound right." ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:port
+        [ lv2:symbol "mode"          ; pset:value 0   ] ,
+        [ lv2:symbol "fixed_note"    ; pset:value 48  ] ,
+        [ lv2:symbol "scale"         ; pset:value 1   ] ,
+        [ lv2:symbol "scale_root"    ; pset:value 0   ] ,
+        [ lv2:symbol "mix"           ; pset:value 1.0 ] ,
+        [ lv2:symbol "portamento"    ; pset:value 20.0 ] ,
+        [ lv2:symbol "carrier_level" ; pset:value 0.6 ] .
+
+<https://github.com/richsio/autovocoder#preset/in_key_a_minor>
+    a pset:Preset ;
+    rdfs:label "In Key — A Minor" ;
+    rdfs:comment "Melodic, natural-minor vocoder line. Good backing-vocal preset." ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:port
+        [ lv2:symbol "mode"          ; pset:value 0   ] ,
+        [ lv2:symbol "fixed_note"    ; pset:value 48  ] ,
+        [ lv2:symbol "scale"         ; pset:value 2   ] ,
+        [ lv2:symbol "scale_root"    ; pset:value 9   ] ,
+        [ lv2:symbol "mix"           ; pset:value 1.0 ] ,
+        [ lv2:symbol "portamento"    ; pset:value 20.0 ] ,
+        [ lv2:symbol "carrier_level" ; pset:value 0.6 ] .
+
+<https://github.com/richsio/autovocoder#preset/dark_choir_am>
+    a pset:Preset ;
+    rdfs:label "Dark Choir (A Minor Triad)" ;
+    rdfs:comment "Each detected note sprouts a minor-triad carrier. Spreads a single voice into an eerie pad." ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:port
+        [ lv2:symbol "mode"          ; pset:value 2   ] ,
+        [ lv2:symbol "fixed_note"    ; pset:value 48  ] ,
+        [ lv2:symbol "scale"         ; pset:value 2   ] ,
+        [ lv2:symbol "scale_root"    ; pset:value 9   ] ,
+        [ lv2:symbol "mix"           ; pset:value 1.0 ] ,
+        [ lv2:symbol "portamento"    ; pset:value 40.0 ] ,
+        [ lv2:symbol "carrier_level" ; pset:value 0.5 ] .
+
+<https://github.com/richsio/autovocoder#preset/bright_angels_c>
+    a pset:Preset ;
+    rdfs:label "Bright Angels (C Major Triad)" ;
+    rdfs:comment "Major-triad per detected note, snapped to C major. Heavenly Auto-Tune-on-steroids vibe." ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:port
+        [ lv2:symbol "mode"          ; pset:value 1   ] ,
+        [ lv2:symbol "fixed_note"    ; pset:value 48  ] ,
+        [ lv2:symbol "scale"         ; pset:value 1   ] ,
+        [ lv2:symbol "scale_root"    ; pset:value 0   ] ,
+        [ lv2:symbol "mix"           ; pset:value 1.0 ] ,
+        [ lv2:symbol "portamento"    ; pset:value 30.0 ] ,
+        [ lv2:symbol "carrier_level" ; pset:value 0.5 ] .
+
+<https://github.com/richsio/autovocoder#preset/heavy_glide>
+    a pset:Preset ;
+    rdfs:label "Heavy Glide" ;
+    rdfs:comment "Chromatic with a long portamento. Slurred, dub-style pitch smears between words." ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:port
+        [ lv2:symbol "mode"          ; pset:value 0   ] ,
+        [ lv2:symbol "fixed_note"    ; pset:value 48  ] ,
+        [ lv2:symbol "scale"         ; pset:value 0   ] ,
+        [ lv2:symbol "scale_root"    ; pset:value 0   ] ,
+        [ lv2:symbol "mix"           ; pset:value 1.0 ] ,
+        [ lv2:symbol "portamento"    ; pset:value 200.0 ] ,
+        [ lv2:symbol "carrier_level" ; pset:value 0.6 ] .
+
+<https://github.com/richsio/autovocoder#preset/subtle_support>
+    a pset:Preset ;
+    rdfs:label "Subtle Support" ;
+    rdfs:comment "Chromatic mono carrier, 30% wet — layered under a real vocal as harmonic reinforcement." ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:port
+        [ lv2:symbol "mode"          ; pset:value 0   ] ,
+        [ lv2:symbol "fixed_note"    ; pset:value 48  ] ,
+        [ lv2:symbol "scale"         ; pset:value 0   ] ,
+        [ lv2:symbol "scale_root"    ; pset:value 0   ] ,
+        [ lv2:symbol "mix"           ; pset:value 0.3 ] ,
+        [ lv2:symbol "portamento"    ; pset:value 15.0 ] ,
+        [ lv2:symbol "carrier_level" ; pset:value 0.6 ] .

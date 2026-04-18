@@ -1,0 +1,105 @@
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix lv2:  <http://lv2plug.in/ns/lv2core#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix pset: <http://lv2plug.in/ns/ext/presets#> .
+@prefix units: <http://lv2plug.in/ns/extensions/units#> .
+
+<https://github.com/richsio/autovocoder>
+    a lv2:Plugin , lv2:SpectralPlugin ;
+    doap:name "Autovocoder" ;
+    doap:license <https://opensource.org/licenses/MIT> ;
+    lv2:optionalFeature lv2:hardRTCapable ;
+    rdfs:comment "Pitch-detect → scale-snap → carrier-synth → channel vocoder. Soundwave-style robotic voice made easy." ;
+
+    lv2:port [
+        a lv2:AudioPort , lv2:InputPort ;
+        lv2:index 0 ;
+        lv2:symbol "in" ;
+        lv2:name "In"
+    ] , [
+        a lv2:AudioPort , lv2:OutputPort ;
+        lv2:index 1 ;
+        lv2:symbol "out" ;
+        lv2:name "Out"
+    ] , [
+        a lv2:ControlPort , lv2:InputPort ;
+        lv2:index 2 ;
+        lv2:symbol "mode" ;
+        lv2:name "Carrier Mode" ;
+        lv2:portProperty lv2:enumeration , lv2:integer ;
+        lv2:default 0 ;
+        lv2:minimum 0 ;
+        lv2:maximum 3 ;
+        lv2:scalePoint [ rdfs:label "Mono"         ; rdf:value 0 ] ;
+        lv2:scalePoint [ rdfs:label "Major Triad"  ; rdf:value 1 ] ;
+        lv2:scalePoint [ rdfs:label "Minor Triad"  ; rdf:value 2 ] ;
+        lv2:scalePoint [ rdfs:label "Fixed Note"   ; rdf:value 3 ]
+    ] , [
+        a lv2:ControlPort , lv2:InputPort ;
+        lv2:index 3 ;
+        lv2:symbol "fixed_note" ;
+        lv2:name "Fixed Note (MIDI)" ;
+        lv2:portProperty lv2:integer ;
+        lv2:default 48 ;
+        lv2:minimum 24 ;
+        lv2:maximum 84
+    ] , [
+        a lv2:ControlPort , lv2:InputPort ;
+        lv2:index 4 ;
+        lv2:symbol "scale" ;
+        lv2:name "Scale" ;
+        lv2:portProperty lv2:enumeration , lv2:integer ;
+        lv2:default 0 ;
+        lv2:minimum 0 ;
+        lv2:maximum 2 ;
+        lv2:scalePoint [ rdfs:label "Chromatic" ; rdf:value 0 ] ;
+        lv2:scalePoint [ rdfs:label "Major"     ; rdf:value 1 ] ;
+        lv2:scalePoint [ rdfs:label "Minor"     ; rdf:value 2 ]
+    ] , [
+        a lv2:ControlPort , lv2:InputPort ;
+        lv2:index 5 ;
+        lv2:symbol "scale_root" ;
+        lv2:name "Scale Root" ;
+        lv2:portProperty lv2:enumeration , lv2:integer ;
+        lv2:default 0 ;
+        lv2:minimum 0 ;
+        lv2:maximum 11 ;
+        lv2:scalePoint [ rdfs:label "C"  ; rdf:value 0  ] ;
+        lv2:scalePoint [ rdfs:label "C#" ; rdf:value 1  ] ;
+        lv2:scalePoint [ rdfs:label "D"  ; rdf:value 2  ] ;
+        lv2:scalePoint [ rdfs:label "D#" ; rdf:value 3  ] ;
+        lv2:scalePoint [ rdfs:label "E"  ; rdf:value 4  ] ;
+        lv2:scalePoint [ rdfs:label "F"  ; rdf:value 5  ] ;
+        lv2:scalePoint [ rdfs:label "F#" ; rdf:value 6  ] ;
+        lv2:scalePoint [ rdfs:label "G"  ; rdf:value 7  ] ;
+        lv2:scalePoint [ rdfs:label "G#" ; rdf:value 8  ] ;
+        lv2:scalePoint [ rdfs:label "A"  ; rdf:value 9  ] ;
+        lv2:scalePoint [ rdfs:label "A#" ; rdf:value 10 ] ;
+        lv2:scalePoint [ rdfs:label "B"  ; rdf:value 11 ]
+    ] , [
+        a lv2:ControlPort , lv2:InputPort ;
+        lv2:index 6 ;
+        lv2:symbol "mix" ;
+        lv2:name "Dry/Wet" ;
+        lv2:default 1.0 ;
+        lv2:minimum 0.0 ;
+        lv2:maximum 1.0
+    ] , [
+        a lv2:ControlPort , lv2:InputPort ;
+        lv2:index 7 ;
+        lv2:symbol "portamento" ;
+        lv2:name "Portamento" ;
+        lv2:default 25.0 ;
+        lv2:minimum 1.0 ;
+        lv2:maximum 500.0 ;
+        units:unit units:ms
+    ] , [
+        a lv2:ControlPort , lv2:InputPort ;
+        lv2:index 8 ;
+        lv2:symbol "carrier_level" ;
+        lv2:name "Carrier Level" ;
+        lv2:default 0.6 ;
+        lv2:minimum 0.0 ;
+        lv2:maximum 2.0
+    ] .

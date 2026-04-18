@@ -1,0 +1,48 @@
+{
+  "name": "autovocoder Development Container",
+  "image": "harbor.tools.basedweights.com/patapsco.ai/dev-container-polyglot:0.2.1",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/git:1": {}
+  },
+  "runArgs": [
+    "--network=host",
+    "--platform=${localEnv:DOCKER_DEFAULT_PLATFORM:linux/amd64}"
+  ],
+  "containerEnv": {
+    "DOCKER_LOGIN_B64": "${localEnv:DOCKER_LOGIN_B64:}",
+    "GITLAB_TOKEN_B64": "${localEnv:GITLAB_TOKEN_B64:}",
+    "GIT_CREDENTIALS_B64": "${localEnv:GIT_CREDENTIALS_B64:}"
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.fontFamily": "MesloLGS NF, FiraCode Nerd Font Mono, JetBrainsMono Nerd Font, monospace",
+        "terminal.integrated.customGlyphs": true,
+        "editor.formatOnSave": true,
+        "yaml.format.singleQuote": true,
+        "[yaml]": {
+          "editor.defaultFormatter": "redhat.vscode-yaml"
+        }
+      },
+      "extensions": [
+        "editorconfig.editorconfig",
+        "ms-azuretools.vscode-docker",
+        "ms-kubernetes-tools.vscode-kubernetes-tools",
+        "redhat.vscode-yaml",
+        "ms-vscode.vscode-json",
+        "anthropic.claude-code"
+      ]
+    }
+  },
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/autovocoder,type=bind,consistency=cached",
+  "workspaceFolder": "/workspaces/autovocoder",
+  "remoteUser": "vscode",
+  "initializeCommand": "cmd.exe /c powershell -NoProfile -Command \"$ErrorActionPreference='SilentlyContinue'; New-Item -ItemType Directory -Force -Path $env:USERPROFILE\\.kube, $env:USERPROFILE\\.claude | Out-Null; if (!(Test-Path $env:USERPROFILE\\.claude.json)) { Set-Content -Path $env:USERPROFILE\\.claude.json -Value '{}' }\" || sh -c 'mkdir -p \"$HOME/.kube\" \"$HOME/.claude\" && touch \"$HOME/.claude.json\"'",
+  "onCreateCommand": "bash .devcontainer/post-create.sh",
+  "mounts": [
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.kube,target=/home/vscode/.kube,type=bind,consistency=cached",
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.claude.json,target=/home/vscode/.claude.json,type=bind",
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.claude,target=/home/vscode/.claude,type=bind"
+  ]
+}
