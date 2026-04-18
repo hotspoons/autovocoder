@@ -135,7 +135,7 @@ impl AutoVocoder {
     }
 
     pub fn set_output_gain_db(&mut self, db: f32) {
-        let clamped = db.clamp(-20.0, 30.0);
+        let clamped = db.clamp(-20.0, 60.0);
         self.cfg.output_gain_db = clamped;
         self.output_gain = db_to_linear(clamped);
     }
@@ -221,11 +221,16 @@ impl AutoVocoder {
         let wet = self.vocoder.process(voice, carrier_sum);
         let mix = self.cfg.dry_wet;
         let mixed = voice * (1.0 - mix) + wet * mix;
-        // Output stage: compress, then makeup gain. Compression runs even
-        // when the user wants it "off" (pass-through inside the compressor),
-        // so toggling doesn't change the code path here.
-        let compressed = self.compressor.process(mixed);
-        compressed * self.output_gain
+        // Output stage: GAIN FIRST, then compressor. The vocoder output is
+        // intrinsically very quiet; if we compressed first, the signal
+        // would still be below threshold and the compressor would do
+        // nothing. Applying gain first means the compressor actually sees
+        // a loud signal and catches peaks — letting users crank gain hard
+        // without clipping. Final soft-clamp is belt-and-suspenders for
+        // extreme gain settings where the compressor can't quite keep up.
+        let gained = mixed * self.output_gain;
+        let compressed = self.compressor.process(gained);
+        compressed.clamp(-0.98, 0.98)
     }
 
     /// Process a buffer in place for convenience.
