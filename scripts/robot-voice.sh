@@ -33,6 +33,11 @@ preset_flags() {
         soundwave-c2)     echo "--mode fixed --fixed-note 36 --portamento 25 --mix 1.0" ;;
         soundwave-c3)     echo "--mode fixed --fixed-note 48 --portamento 25 --mix 1.0" ;;
         soundwave-g2)     echo "--mode fixed --fixed-note 43 --portamento 25 --mix 1.0" ;;
+        # "Intergalactic, planetary, planetary, intergalactic." Fixed A2 masculine
+        # robot, snappy portamento so each syllable locks in, carrier pushed for
+        # that bright buzzy analog-vocoder character. Try --fixed-note 43 (G2) or
+        # 47 (B2) to find your sweet spot — the track modulates.
+        intergalactic)    echo "--mode fixed --fixed-note 45 --portamento 12 --mix 1.0 --carrier-level 0.8" ;;
         chromatic-robot)  echo "--mode mono --portamento 8  --mix 1.0" ;;
         heavy-glide)      echo "--mode mono --portamento 200 --mix 1.0" ;;
         in-key-c-major)   echo "--mode mono --scale major --scale-root 0 --portamento 20 --mix 1.0" ;;
@@ -48,6 +53,7 @@ ALL_PRESETS=(
     soundwave-c2
     soundwave-c3
     soundwave-g2
+    intergalactic
     chromatic-robot
     heavy-glide
     in-key-c-major

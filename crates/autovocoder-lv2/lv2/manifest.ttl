@@ -21,6 +21,11 @@
     lv2:appliesTo <https://github.com/richsio/autovocoder> ;
     rdfs:seeAlso <presets.ttl> .
 
+<https://github.com/richsio/autovocoder#preset/intergalactic>
+    a pset:Preset ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    rdfs:seeAlso <presets.ttl> .
+
 <https://github.com/richsio/autovocoder#preset/chromatic_robot>
     a pset:Preset ;
     lv2:appliesTo <https://github.com/richsio/autovocoder> ;

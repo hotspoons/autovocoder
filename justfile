@@ -52,10 +52,10 @@ lv2-bundle: release
     cp crates/autovocoder-lv2/lv2/presets.ttl "$OUT/"
     echo "Bundle: $OUT"
 
-# Install the LV2 plugin to ~/.lv2
-lv2-install: lv2-bundle
-    mkdir -p ~/.lv2
-    cp -r target/lv2/autovocoder.lv2 ~/.lv2/
+# Install the LV2 plugin to ~/.lv2 (builds + copies). Delegates to the
+# standalone script so people without `just` can install the same way.
+lv2-install:
+    scripts/install-lv2.sh
 
 # One-time: install zig + cargo-zigbuild + apple-darwin rustup targets.
 # Safe to re-run after a devcontainer rebuild.

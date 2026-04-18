@@ -34,6 +34,20 @@
         [ lv2:symbol "portamento"    ; pset:value 25.0 ] ,
         [ lv2:symbol "carrier_level" ; pset:value 0.6 ] .
 
+<https://github.com/richsio/autovocoder#preset/intergalactic>
+    a pset:Preset ;
+    rdfs:label "Intergalactic" ;
+    rdfs:comment "Beastie Boys vocoder-refrain vibe: fixed A2, snappy glide, bright carrier, fully wet." ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:port
+        [ lv2:symbol "mode"          ; pset:value 3   ] ,
+        [ lv2:symbol "fixed_note"    ; pset:value 45  ] ,
+        [ lv2:symbol "scale"         ; pset:value 0   ] ,
+        [ lv2:symbol "scale_root"    ; pset:value 0   ] ,
+        [ lv2:symbol "mix"           ; pset:value 1.0 ] ,
+        [ lv2:symbol "portamento"    ; pset:value 12.0 ] ,
+        [ lv2:symbol "carrier_level" ; pset:value 0.8 ] .
+
 <https://github.com/richsio/autovocoder#preset/chromatic_robot>
     a pset:Preset ;
     rdfs:label "Chromatic Robot" ;
