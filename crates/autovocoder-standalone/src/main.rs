@@ -62,6 +62,20 @@ pub struct SharedCfg {
     /// Carrier oscillator level feeding the vocoder (0.0–2.0).
     #[arg(long, default_value_t = 0.6)]
     pub carrier_level: f32,
+
+    /// Output makeup gain in dB (post-compressor). Vocoders attenuate heavily;
+    /// a positive value (default +9 dB) keeps the level in the ballpark of
+    /// the dry signal.
+    #[arg(long, default_value_t = 9.0)]
+    pub output_gain: f32,
+
+    /// Disable the built-in output compressor.
+    #[arg(long)]
+    pub no_compress: bool,
+
+    /// Compressor threshold in dB (default -18).
+    #[arg(long, default_value_t = -18.0)]
+    pub comp_threshold: f32,
 }
 
 #[derive(Copy, Clone, Debug, ValueEnum)]
@@ -100,6 +114,9 @@ impl SharedCfg {
             dry_wet: self.mix.clamp(0.0, 1.0),
             portamento_ms: self.portamento.clamp(0.5, 1000.0),
             carrier_level: self.carrier_level.clamp(0.0, 2.0),
+            output_gain_db: self.output_gain.clamp(-20.0, 30.0),
+            compressor_enabled: !self.no_compress,
+            compressor_threshold_db: self.comp_threshold.clamp(-60.0, 0.0),
             ..AutoVocoderConfig::default()
         }
     }

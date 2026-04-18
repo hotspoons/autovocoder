@@ -48,16 +48,6 @@ pub fn run(args: RenderArgs) -> Result<()> {
     let mut out = samples;
     av.process_buffer(&mut out);
 
-    // Peak-normalize to ~-1 dBFS so unmastered renders are listenable.
-    // CLI convenience; the DSP itself does no makeup gain.
-    let peak = out.iter().map(|x| x.abs()).fold(0.0f32, f32::max);
-    if peak > 1e-4 {
-        let gain = 0.89 / peak;
-        for s in &mut out {
-            *s *= gain;
-        }
-    }
-
     let out_spec = hound::WavSpec {
         channels: 1,
         sample_rate: spec.sample_rate,

@@ -14,6 +14,9 @@
 //!   6  Mix          (float 0..1, dry/wet)
 //!   7  Portamento   (float 1..500 ms)
 //!   8  CarrierLevel (float 0..2)
+//!   9  OutputGain   (float -20..+30 dB; post-compressor makeup)
+//!  10  CompOn       (int 0/1; enable the built-in compressor)
+//!  11  CompThreshold (float -40..0 dB; compressor threshold)
 
 #![allow(non_camel_case_types)]
 #![allow(clippy::missing_safety_doc)]
@@ -66,6 +69,9 @@ const PORT_SCALE_ROOT: u32 = 5;
 const PORT_MIX: u32 = 6;
 const PORT_PORTAMENTO: u32 = 7;
 const PORT_CARRIER_LEVEL: u32 = 8;
+const PORT_OUTPUT_GAIN: u32 = 9;
+const PORT_COMP_ON: u32 = 10;
+const PORT_COMP_THRESHOLD: u32 = 11;
 
 struct Plugin {
     av: AutoVocoder,
@@ -82,6 +88,9 @@ struct Plugin {
     mix: *const f32,
     portamento: *const f32,
     carrier_level: *const f32,
+    output_gain: *const f32,
+    comp_on: *const f32,
+    comp_threshold: *const f32,
 
     // Last-seen values, so we only push into DSP on change (cheap RT-safe).
     last_mode: i32,
@@ -91,6 +100,9 @@ struct Plugin {
     last_mix: f32,
     last_portamento: f32,
     last_carrier_level: f32,
+    last_output_gain: f32,
+    last_comp_on: i32,
+    last_comp_threshold: f32,
 }
 
 unsafe extern "C" fn instantiate(
@@ -112,6 +124,9 @@ unsafe extern "C" fn instantiate(
         mix: ptr::null(),
         portamento: ptr::null(),
         carrier_level: ptr::null(),
+        output_gain: ptr::null(),
+        comp_on: ptr::null(),
+        comp_threshold: ptr::null(),
         last_mode: -1,
         last_fixed_note: -1,
         last_scale_kind: -1,
@@ -119,6 +134,9 @@ unsafe extern "C" fn instantiate(
         last_mix: f32::NAN,
         last_portamento: f32::NAN,
         last_carrier_level: f32::NAN,
+        last_output_gain: f32::NAN,
+        last_comp_on: -1,
+        last_comp_threshold: f32::NAN,
     });
     Box::into_raw(p) as LV2_Handle
 }
@@ -135,6 +153,9 @@ unsafe extern "C" fn connect_port(instance: LV2_Handle, port: u32, data: *mut c_
         PORT_MIX => p.mix = data as *const f32,
         PORT_PORTAMENTO => p.portamento = data as *const f32,
         PORT_CARRIER_LEVEL => p.carrier_level = data as *const f32,
+        PORT_OUTPUT_GAIN => p.output_gain = data as *const f32,
+        PORT_COMP_ON => p.comp_on = data as *const f32,
+        PORT_COMP_THRESHOLD => p.comp_threshold = data as *const f32,
         _ => {}
     }
 }
@@ -209,6 +230,23 @@ unsafe fn apply_controls(p: &mut Plugin) {
         if (l - p.last_carrier_level).abs() > 1e-4 {
             p.av.set_carrier_level(l);
             p.last_carrier_level = l;
+        }
+    }
+    if let Some(g) = read_float(p.output_gain) {
+        if (g - p.last_output_gain).abs() > 1e-3 {
+            p.av.set_output_gain_db(g);
+            p.last_output_gain = g;
+        }
+    }
+    let comp_on_i = read_int(p.comp_on, p.last_comp_on.max(0));
+    if comp_on_i != p.last_comp_on {
+        p.av.set_compressor_enabled(comp_on_i != 0);
+        p.last_comp_on = comp_on_i;
+    }
+    if let Some(t) = read_float(p.comp_threshold) {
+        if (t - p.last_comp_threshold).abs() > 1e-3 {
+            p.av.set_compressor_threshold_db(t);
+            p.last_comp_threshold = t;
         }
     }
 }

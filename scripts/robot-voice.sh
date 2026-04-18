@@ -37,14 +37,14 @@ preset_flags() {
         # robot, snappy portamento so each syllable locks in, carrier pushed for
         # that bright buzzy analog-vocoder character. Try --fixed-note 43 (G2) or
         # 47 (B2) to find your sweet spot — the track modulates.
-        intergalactic)    echo "--mode fixed --fixed-note 45 --portamento 12 --mix 1.0 --carrier-level 0.8" ;;
+        intergalactic)    echo "--mode fixed --fixed-note 45 --portamento 12 --mix 1.0 --carrier-level 0.8 --output-gain 12 --comp-threshold -20" ;;
         chromatic-robot)  echo "--mode mono --portamento 8  --mix 1.0" ;;
         heavy-glide)      echo "--mode mono --portamento 200 --mix 1.0" ;;
         in-key-c-major)   echo "--mode mono --scale major --scale-root 0 --portamento 20 --mix 1.0" ;;
         in-key-a-minor)   echo "--mode mono --scale minor --scale-root 9 --portamento 20 --mix 1.0" ;;
         dark-choir)       echo "--mode minor-triad --scale minor --scale-root 9 --portamento 40 --mix 1.0" ;;
         bright-angels)    echo "--mode major-triad --scale major --scale-root 0 --portamento 30 --mix 1.0" ;;
-        subtle-support)   echo "--mode mono --portamento 15 --mix 0.3" ;;
+        subtle-support)   echo "--mode mono --portamento 15 --mix 0.3 --output-gain 3" ;;
         *) return 1 ;;
     esac
 }

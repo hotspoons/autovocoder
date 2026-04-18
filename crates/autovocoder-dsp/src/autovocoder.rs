@@ -1,6 +1,7 @@
 //! Top-level autovocoder: pitch-detect the voice, quantize to scale,
 //! synthesize a carrier, drive the vocoder.
 
+use crate::dynamics::{db_to_linear, Compressor};
 use crate::osc::Saw;
 use crate::pitch::{PitchEstimate, YinDetector};
 use crate::scale::{midi_to_hz, quantize_hz_to_scale, Portamento, Scale};
@@ -42,6 +43,10 @@ pub struct AutoVocoderConfig {
     pub carrier_level: f32, // saw level fed to the vocoder
     pub pitch_min_hz: f32,
     pub pitch_max_hz: f32,
+    // Output stage.
+    pub output_gain_db: f32, // applied after compressor
+    pub compressor_enabled: bool,
+    pub compressor_threshold_db: f32,
 }
 
 impl Default for AutoVocoderConfig {
@@ -55,6 +60,12 @@ impl Default for AutoVocoderConfig {
             carrier_level: 0.6,
             pitch_min_hz: 70.0,
             pitch_max_hz: 800.0,
+            // Vocoders are inherently quiet vs input (most energy lives
+            // outside any single band). These defaults make the plugin
+            // useful straight out of the box without an external makeup.
+            output_gain_db: 9.0,
+            compressor_enabled: true,
+            compressor_threshold_db: -18.0,
         }
     }
 }
@@ -68,12 +79,16 @@ pub struct AutoVocoder {
     oscs: [Saw; 3],
     portos: [Portamento; 3],
     vocoder: Vocoder,
+    compressor: Compressor,
+    output_gain: f32, // linear, derived from output_gain_db
 }
 
 impl AutoVocoder {
     pub fn new(sample_rate: f32, cfg: AutoVocoderConfig) -> Self {
         let yin = YinDetector::new(sample_rate, cfg.pitch_min_hz, cfg.pitch_max_hz, 256);
         let mk_porto = || Portamento::new(sample_rate, cfg.portamento_ms);
+        let mut compressor = Compressor::new(sample_rate, cfg.compressor_threshold_db);
+        compressor.set_enabled(cfg.compressor_enabled);
         Self {
             sample_rate,
             yin,
@@ -85,6 +100,8 @@ impl AutoVocoder {
             ],
             portos: [mk_porto(), mk_porto(), mk_porto()],
             vocoder: Vocoder::new(sample_rate, cfg.vocoder),
+            compressor,
+            output_gain: db_to_linear(cfg.output_gain_db),
             cfg,
         }
     }
@@ -117,8 +134,25 @@ impl AutoVocoder {
         self.cfg.carrier_level = level.clamp(0.0, 2.0);
     }
 
+    pub fn set_output_gain_db(&mut self, db: f32) {
+        let clamped = db.clamp(-20.0, 30.0);
+        self.cfg.output_gain_db = clamped;
+        self.output_gain = db_to_linear(clamped);
+    }
+
+    pub fn set_compressor_enabled(&mut self, on: bool) {
+        self.cfg.compressor_enabled = on;
+        self.compressor.set_enabled(on);
+    }
+
+    pub fn set_compressor_threshold_db(&mut self, db: f32) {
+        self.cfg.compressor_threshold_db = db;
+        self.compressor.set_threshold_db(db);
+    }
+
     pub fn reset(&mut self) {
         self.vocoder.reset();
+        self.compressor.reset();
         self.last_pitch = PitchEstimate::UNVOICED;
         for o in &mut self.oscs {
             o.reset_phase();
@@ -186,7 +220,12 @@ impl AutoVocoder {
 
         let wet = self.vocoder.process(voice, carrier_sum);
         let mix = self.cfg.dry_wet;
-        voice * (1.0 - mix) + wet * mix
+        let mixed = voice * (1.0 - mix) + wet * mix;
+        // Output stage: compress, then makeup gain. Compression runs even
+        // when the user wants it "off" (pass-through inside the compressor),
+        // so toggling doesn't change the code path here.
+        let compressed = self.compressor.process(mixed);
+        compressed * self.output_gain
     }
 
     /// Process a buffer in place for convenience.

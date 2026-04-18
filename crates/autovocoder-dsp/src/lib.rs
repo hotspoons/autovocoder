@@ -6,6 +6,7 @@
 //!   voice → analysis filterbank → envelope followers ──→ VCA × carrier bands → sum → out
 
 pub mod autovocoder;
+pub mod dynamics;
 pub mod filter;
 pub mod osc;
 pub mod pitch;
