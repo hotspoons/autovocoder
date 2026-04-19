@@ -7,21 +7,23 @@
 //! Ports (see lv2/autovocoder.ttl for matching symbol names and ranges):
 //!   0  AudioInput
 //!   1  AudioOutput
-//!   2  Mode         (int: 0=mono, 1=major_triad, 2=minor_triad, 3=fixed)
-//!   3  FixedNote    (int MIDI 0..127, used when Mode==fixed)
-//!   4  Scale        (int: 0=chromatic, 1=major, 2=minor)
-//!   5  ScaleRoot    (int pitch class 0..11)
-//!   6  Mix          (float 0..1, dry/wet)
-//!   7  Portamento   (float 1..500 ms)
-//!   8  CarrierLevel (float 0..2)
-//!   9  OutputGain   (float -20..+30 dB; post-compressor makeup)
-//!  10  CompOn       (int 0/1; enable the built-in compressor)
-//!  11  CompThreshold (float -40..0 dB; compressor threshold)
+//!   2  Mode          (int: 0=mono, 1=chord, 2=fixed, 3=fixed_chord)
+//!   3  FixedNote     (int MIDI 0..127; used when Mode==fixed or fixed_chord)
+//!   4  Scale         (int: 0=chromatic, 1=major, 2=minor)
+//!   5  ScaleRoot     (int pitch class 0..11)
+//!   6  Mix           (float 0..1, dry/wet)
+//!   7  Portamento    (float 1..500 ms)
+//!   8  CarrierLevel  (float 0..2)
+//!   9  InputGain     (float -20..+60 dB; pre-vocoder)
+//!  10  OutputGain    (float -20..+60 dB; post-compressor makeup)
+//!  11  CompOn        (int 0/1; enable the built-in compressor)
+//!  12  CompThreshold (float -40..0 dB; compressor threshold)
+//!  13  ChordType     (int 0..14; voicing for Chord / FixedChord modes)
 
 #![allow(non_camel_case_types)]
 #![allow(clippy::missing_safety_doc)]
 
-use autovocoder_dsp::{AutoVocoder, AutoVocoderConfig, CarrierMode, Scale};
+use autovocoder_dsp::{AutoVocoder, AutoVocoderConfig, CarrierMode, ChordVoicing, Scale};
 use std::ffi::{c_char, c_void, CStr};
 use std::ptr;
 
@@ -69,9 +71,11 @@ const PORT_SCALE_ROOT: u32 = 5;
 const PORT_MIX: u32 = 6;
 const PORT_PORTAMENTO: u32 = 7;
 const PORT_CARRIER_LEVEL: u32 = 8;
-const PORT_OUTPUT_GAIN: u32 = 9;
-const PORT_COMP_ON: u32 = 10;
-const PORT_COMP_THRESHOLD: u32 = 11;
+const PORT_INPUT_GAIN: u32 = 9;
+const PORT_OUTPUT_GAIN: u32 = 10;
+const PORT_COMP_ON: u32 = 11;
+const PORT_COMP_THRESHOLD: u32 = 12;
+const PORT_CHORD_TYPE: u32 = 13;
 
 struct Plugin {
     av: AutoVocoder,
@@ -88,9 +92,11 @@ struct Plugin {
     mix: *const f32,
     portamento: *const f32,
     carrier_level: *const f32,
+    input_gain: *const f32,
     output_gain: *const f32,
     comp_on: *const f32,
     comp_threshold: *const f32,
+    chord_type: *const f32,
 
     // Last-seen values, so we only push into DSP on change (cheap RT-safe).
     last_mode: i32,
@@ -100,9 +106,11 @@ struct Plugin {
     last_mix: f32,
     last_portamento: f32,
     last_carrier_level: f32,
+    last_input_gain: f32,
     last_output_gain: f32,
     last_comp_on: i32,
     last_comp_threshold: f32,
+    last_chord_type: i32,
 }
 
 unsafe extern "C" fn instantiate(
@@ -124,9 +132,11 @@ unsafe extern "C" fn instantiate(
         mix: ptr::null(),
         portamento: ptr::null(),
         carrier_level: ptr::null(),
+        input_gain: ptr::null(),
         output_gain: ptr::null(),
         comp_on: ptr::null(),
         comp_threshold: ptr::null(),
+        chord_type: ptr::null(),
         last_mode: -1,
         last_fixed_note: -1,
         last_scale_kind: -1,
@@ -134,9 +144,11 @@ unsafe extern "C" fn instantiate(
         last_mix: f32::NAN,
         last_portamento: f32::NAN,
         last_carrier_level: f32::NAN,
+        last_input_gain: f32::NAN,
         last_output_gain: f32::NAN,
         last_comp_on: -1,
         last_comp_threshold: f32::NAN,
+        last_chord_type: -1,
     });
     Box::into_raw(p) as LV2_Handle
 }
@@ -153,9 +165,11 @@ unsafe extern "C" fn connect_port(instance: LV2_Handle, port: u32, data: *mut c_
         PORT_MIX => p.mix = data as *const f32,
         PORT_PORTAMENTO => p.portamento = data as *const f32,
         PORT_CARRIER_LEVEL => p.carrier_level = data as *const f32,
+        PORT_INPUT_GAIN => p.input_gain = data as *const f32,
         PORT_OUTPUT_GAIN => p.output_gain = data as *const f32,
         PORT_COMP_ON => p.comp_on = data as *const f32,
         PORT_COMP_THRESHOLD => p.comp_threshold = data as *const f32,
+        PORT_CHORD_TYPE => p.chord_type = data as *const f32,
         _ => {}
     }
 }
@@ -189,18 +203,21 @@ unsafe fn apply_controls(p: &mut Plugin) {
     let fixed_i = read_int(p.fixed_note, p.last_fixed_note.max(0));
     let scale_i = read_int(p.scale_kind, p.last_scale_kind);
     let root_i = read_int(p.scale_root, p.last_scale_root.max(0));
+    let chord_i = read_int(p.chord_type, p.last_chord_type.max(0));
 
-    if mode_i != p.last_mode || fixed_i != p.last_fixed_note {
+    // Any of mode / fixed-note / chord-type changing means rebuild CarrierMode.
+    if mode_i != p.last_mode || fixed_i != p.last_fixed_note || chord_i != p.last_chord_type {
+        let voicing = ChordVoicing::from_int(chord_i);
+        let midi = fixed_i.clamp(0, 127) as u8;
         p.av.set_carrier_mode(match mode_i {
-            1 => CarrierMode::major_triad(),
-            2 => CarrierMode::minor_triad(),
-            3 => CarrierMode::Fixed {
-                midi: fixed_i.clamp(0, 127) as u8,
-            },
+            1 => CarrierMode::Chord(voicing),
+            2 => CarrierMode::Fixed { midi },
+            3 => CarrierMode::FixedChord { midi, voicing },
             _ => CarrierMode::Mono,
         });
         p.last_mode = mode_i;
         p.last_fixed_note = fixed_i;
+        p.last_chord_type = chord_i;
     }
 
     if scale_i != p.last_scale_kind || root_i != p.last_scale_root {
@@ -230,6 +247,12 @@ unsafe fn apply_controls(p: &mut Plugin) {
         if (l - p.last_carrier_level).abs() > 1e-4 {
             p.av.set_carrier_level(l);
             p.last_carrier_level = l;
+        }
+    }
+    if let Some(g) = read_float(p.input_gain) {
+        if (g - p.last_input_gain).abs() > 1e-3 {
+            p.av.set_input_gain_db(g);
+            p.last_input_gain = g;
         }
     }
     if let Some(g) = read_float(p.output_gain) {

@@ -31,10 +31,10 @@
         lv2:default 0 ;
         lv2:minimum 0 ;
         lv2:maximum 3 ;
-        lv2:scalePoint [ rdfs:label "Mono"         ; rdf:value 0 ] ;
-        lv2:scalePoint [ rdfs:label "Major Triad"  ; rdf:value 1 ] ;
-        lv2:scalePoint [ rdfs:label "Minor Triad"  ; rdf:value 2 ] ;
-        lv2:scalePoint [ rdfs:label "Fixed Note"   ; rdf:value 3 ]
+        lv2:scalePoint [ rdfs:label "Mono"             ; rdf:value 0 ] ;
+        lv2:scalePoint [ rdfs:label "Chord (tracks)"   ; rdf:value 1 ] ;
+        lv2:scalePoint [ rdfs:label "Fixed Note"       ; rdf:value 2 ] ;
+        lv2:scalePoint [ rdfs:label "Fixed Chord"      ; rdf:value 3 ]
     ] , [
         a lv2:ControlPort , lv2:InputPort ;
         lv2:index 3 ;
@@ -105,8 +105,8 @@
     ] , [
         a lv2:ControlPort , lv2:InputPort ;
         lv2:index 9 ;
-        lv2:symbol "output_gain" ;
-        lv2:name "Output Gain" ;
+        lv2:symbol "input_gain" ;
+        lv2:name "Input Gain" ;
         lv2:default 9.0 ;
         lv2:minimum -20.0 ;
         lv2:maximum 60.0 ;
@@ -114,6 +114,15 @@
     ] , [
         a lv2:ControlPort , lv2:InputPort ;
         lv2:index 10 ;
+        lv2:symbol "output_gain" ;
+        lv2:name "Output Gain" ;
+        lv2:default 6.0 ;
+        lv2:minimum -20.0 ;
+        lv2:maximum 60.0 ;
+        units:unit units:db
+    ] , [
+        a lv2:ControlPort , lv2:InputPort ;
+        lv2:index 11 ;
         lv2:symbol "comp_on" ;
         lv2:name "Compressor" ;
         lv2:portProperty lv2:toggled , lv2:integer ;
@@ -122,11 +131,35 @@
         lv2:maximum 1
     ] , [
         a lv2:ControlPort , lv2:InputPort ;
-        lv2:index 11 ;
+        lv2:index 12 ;
         lv2:symbol "comp_threshold" ;
         lv2:name "Compressor Threshold" ;
         lv2:default -18.0 ;
         lv2:minimum -40.0 ;
         lv2:maximum 0.0 ;
         units:unit units:db
+    ] , [
+        a lv2:ControlPort , lv2:InputPort ;
+        lv2:index 13 ;
+        lv2:symbol "chord_type" ;
+        lv2:name "Chord Type" ;
+        lv2:portProperty lv2:enumeration , lv2:integer ;
+        lv2:default 1 ;
+        lv2:minimum 0 ;
+        lv2:maximum 14 ;
+        lv2:scalePoint [ rdfs:label "Power (5)"       ; rdf:value 0  ] ;
+        lv2:scalePoint [ rdfs:label "Major"           ; rdf:value 1  ] ;
+        lv2:scalePoint [ rdfs:label "Minor"           ; rdf:value 2  ] ;
+        lv2:scalePoint [ rdfs:label "Sus2"            ; rdf:value 3  ] ;
+        lv2:scalePoint [ rdfs:label "Sus4"            ; rdf:value 4  ] ;
+        lv2:scalePoint [ rdfs:label "Diminished"      ; rdf:value 5  ] ;
+        lv2:scalePoint [ rdfs:label "Augmented"       ; rdf:value 6  ] ;
+        lv2:scalePoint [ rdfs:label "Major 7"         ; rdf:value 7  ] ;
+        lv2:scalePoint [ rdfs:label "Minor 7"         ; rdf:value 8  ] ;
+        lv2:scalePoint [ rdfs:label "Dominant 7"      ; rdf:value 9  ] ;
+        lv2:scalePoint [ rdfs:label "Diminished 7"    ; rdf:value 10 ] ;
+        lv2:scalePoint [ rdfs:label "Half-Diminished" ; rdf:value 11 ] ;
+        lv2:scalePoint [ rdfs:label "Add 9"           ; rdf:value 12 ] ;
+        lv2:scalePoint [ rdfs:label "Dominant 9"      ; rdf:value 13 ] ;
+        lv2:scalePoint [ rdfs:label "Minor 9"         ; rdf:value 14 ]
     ] .

@@ -13,6 +13,6 @@ pub mod pitch;
 pub mod scale;
 pub mod vocoder;
 
-pub use autovocoder::{AutoVocoder, AutoVocoderConfig, CarrierMode};
+pub use autovocoder::{AutoVocoder, AutoVocoderConfig, CarrierMode, ChordVoicing};
 pub use scale::Scale;
 pub use vocoder::VocoderConfig;

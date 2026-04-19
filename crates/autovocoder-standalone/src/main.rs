@@ -8,7 +8,7 @@
 //! through cpal, for auditioning on a laptop without involving a DAW.
 
 use anyhow::Result;
-use autovocoder_dsp::{AutoVocoderConfig, CarrierMode, Scale};
+use autovocoder_dsp::{AutoVocoderConfig, CarrierMode, ChordVoicing, Scale};
 use clap::{Args, Parser, Subcommand, ValueEnum};
 
 #[cfg(feature = "live")]
@@ -35,10 +35,18 @@ enum Cmd {
 #[derive(Args, Debug, Clone)]
 pub struct SharedCfg {
     /// Carrier mode.
+    /// - mono:        one saw, tracks detected pitch
+    /// - chord:       a chord (see --chord) whose root tracks detected pitch
+    /// - fixed:       one saw at --fixed-note
+    /// - fixed-chord: a chord rooted at --fixed-note (classic Soundwave)
     #[arg(long, value_enum, default_value_t = Mode::Mono)]
     pub mode: Mode,
 
-    /// Fixed MIDI note for `fixed` mode (default: 48 = C3, Soundwave-ish).
+    /// Chord voicing for `chord` and `fixed-chord` modes.
+    #[arg(long, value_enum, default_value_t = Chord::Major)]
+    pub chord: Chord,
+
+    /// Fixed MIDI note for `fixed` / `fixed-chord` modes (default: 48 = C3).
     #[arg(long, default_value_t = 48)]
     pub fixed_note: u8,
 
@@ -63,10 +71,17 @@ pub struct SharedCfg {
     #[arg(long, default_value_t = 0.6)]
     pub carrier_level: f32,
 
-    /// Output makeup gain in dB, applied BEFORE the compressor. Vocoders
-    /// attenuate heavily; default +9 dB is conservative. Range -20..+60.
-    /// Very high values are safe — compressor + final soft-clamp catch peaks.
+    /// Input gain in dB, applied to the voice before the vocoder.
+    /// Primary knob for loudness — a hotter modulator drives the envelope
+    /// followers harder, so the vocoder output is louder before any
+    /// post-stage gain. Range -20..+60.
     #[arg(long, default_value_t = 9.0)]
+    pub input_gain: f32,
+
+    /// Output makeup gain in dB, applied AFTER the compressor.
+    /// Use this to fine-tune the final level after --input-gain has set
+    /// the working dynamic range. Range -20..+60.
+    #[arg(long, default_value_t = 6.0)]
     pub output_gain: f32,
 
     /// Disable the built-in output compressor.
@@ -81,9 +96,50 @@ pub struct SharedCfg {
 #[derive(Copy, Clone, Debug, ValueEnum)]
 pub enum Mode {
     Mono,
-    MajorTriad,
-    MinorTriad,
+    Chord,
     Fixed,
+    FixedChord,
+}
+
+#[derive(Copy, Clone, Debug, ValueEnum)]
+pub enum Chord {
+    Power,
+    Major,
+    Minor,
+    Sus2,
+    Sus4,
+    Diminished,
+    Augmented,
+    Maj7,
+    Min7,
+    Dom7,
+    Dim7,
+    HalfDim7,
+    Add9,
+    Dom9,
+    Min9,
+}
+
+impl Chord {
+    fn to_voicing(self) -> ChordVoicing {
+        match self {
+            Chord::Power => ChordVoicing::Power,
+            Chord::Major => ChordVoicing::Major,
+            Chord::Minor => ChordVoicing::Minor,
+            Chord::Sus2 => ChordVoicing::Sus2,
+            Chord::Sus4 => ChordVoicing::Sus4,
+            Chord::Diminished => ChordVoicing::Diminished,
+            Chord::Augmented => ChordVoicing::Augmented,
+            Chord::Maj7 => ChordVoicing::Maj7,
+            Chord::Min7 => ChordVoicing::Min7,
+            Chord::Dom7 => ChordVoicing::Dom7,
+            Chord::Dim7 => ChordVoicing::Dim7,
+            Chord::HalfDim7 => ChordVoicing::HalfDim7,
+            Chord::Add9 => ChordVoicing::Add9,
+            Chord::Dom9 => ChordVoicing::Dom9,
+            Chord::Min9 => ChordVoicing::Min9,
+        }
+    }
 }
 
 #[derive(Copy, Clone, Debug, ValueEnum)]
@@ -100,12 +156,16 @@ impl SharedCfg {
             ScaleKind::Major => Scale::major(self.scale_root % 12),
             ScaleKind::Minor => Scale::minor(self.scale_root % 12),
         };
+        let voicing = self.chord.to_voicing();
         let carrier_mode = match self.mode {
             Mode::Mono => CarrierMode::Mono,
-            Mode::MajorTriad => CarrierMode::major_triad(),
-            Mode::MinorTriad => CarrierMode::minor_triad(),
+            Mode::Chord => CarrierMode::Chord(voicing),
             Mode::Fixed => CarrierMode::Fixed {
                 midi: self.fixed_note,
+            },
+            Mode::FixedChord => CarrierMode::FixedChord {
+                midi: self.fixed_note,
+                voicing,
             },
         };
         AutoVocoderConfig {
@@ -114,6 +174,7 @@ impl SharedCfg {
             dry_wet: self.mix.clamp(0.0, 1.0),
             portamento_ms: self.portamento.clamp(0.5, 1000.0),
             carrier_level: self.carrier_level.clamp(0.0, 2.0),
+            input_gain_db: self.input_gain.clamp(-20.0, 60.0),
             output_gain_db: self.output_gain.clamp(-20.0, 60.0),
             compressor_enabled: !self.no_compress,
             compressor_threshold_db: self.comp_threshold.clamp(-60.0, 0.0),

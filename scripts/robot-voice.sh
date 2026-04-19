@@ -28,23 +28,26 @@ OUTPUT_DEVICE="${OUTPUT_DEVICE:-BlackHole}"
 DEFAULT_PRESET="soundwave-c3"
 
 # Preset → CLI-flags lookup. Mirrors the LV2 presets where it makes sense.
+# Authentic Soundwave: fixed-root minor triad at low register (per the
+# Scott Brownlee / Frank Welker audio engineering interview).
 preset_flags() {
     case "$1" in
-        soundwave-c2)     echo "--mode fixed --fixed-note 36 --portamento 25 --mix 1.0" ;;
-        soundwave-c3)     echo "--mode fixed --fixed-note 48 --portamento 25 --mix 1.0" ;;
-        soundwave-g2)     echo "--mode fixed --fixed-note 43 --portamento 25 --mix 1.0" ;;
-        # "Intergalactic, planetary, planetary, intergalactic." Fixed A2 masculine
-        # robot, snappy portamento so each syllable locks in, carrier pushed for
-        # that bright buzzy analog-vocoder character. Try --fixed-note 43 (G2) or
-        # 47 (B2) to find your sweet spot — the track modulates.
-        intergalactic)    echo "--mode fixed --fixed-note 45 --portamento 12 --mix 1.0 --carrier-level 0.8 --output-gain 12 --comp-threshold -20" ;;
+        soundwave-c2)     echo "--mode fixed-chord --chord minor --fixed-note 36 --portamento 25 --mix 1.0" ;;
+        soundwave-c3)     echo "--mode fixed-chord --chord minor --fixed-note 48 --portamento 25 --mix 1.0" ;;
+        soundwave-g2)     echo "--mode fixed-chord --chord minor --fixed-note 43 --portamento 25 --mix 1.0" ;;
+        # Intergalactic: fixed A2 single saw, bright carrier, hot input.
+        # Try --fixed-note 43/47 to shift register with the track.
+        intergalactic)    echo "--mode fixed --fixed-note 45 --portamento 12 --mix 1.0 --carrier-level 0.8 --input-gain 12 --output-gain 9 --comp-threshold -20" ;;
         chromatic-robot)  echo "--mode mono --portamento 8  --mix 1.0" ;;
         heavy-glide)      echo "--mode mono --portamento 200 --mix 1.0" ;;
         in-key-c-major)   echo "--mode mono --scale major --scale-root 0 --portamento 20 --mix 1.0" ;;
         in-key-a-minor)   echo "--mode mono --scale minor --scale-root 9 --portamento 20 --mix 1.0" ;;
-        dark-choir)       echo "--mode minor-triad --scale minor --scale-root 9 --portamento 40 --mix 1.0" ;;
-        bright-angels)    echo "--mode major-triad --scale major --scale-root 0 --portamento 30 --mix 1.0" ;;
-        subtle-support)   echo "--mode mono --portamento 15 --mix 0.3 --output-gain 3" ;;
+        dark-choir)       echo "--mode chord --chord minor --scale minor --scale-root 9 --portamento 40 --mix 1.0" ;;
+        bright-angels)    echo "--mode chord --chord major --scale major --scale-root 0 --portamento 30 --mix 1.0" ;;
+        jazz-maj7)        echo "--mode chord --chord maj7 --scale major --scale-root 0 --portamento 35 --mix 1.0 --carrier-level 0.45" ;;
+        ominous-dim7)     echo "--mode fixed-chord --chord dim7 --fixed-note 40 --portamento 25 --mix 1.0 --carrier-level 0.5" ;;
+        power-chord)      echo "--mode fixed-chord --chord power --fixed-note 33 --portamento 20 --mix 1.0 --carrier-level 0.7 --input-gain 12" ;;
+        subtle-support)   echo "--mode mono --portamento 15 --mix 0.3 --input-gain 6 --output-gain 3" ;;
         *) return 1 ;;
     esac
 }
@@ -60,6 +63,9 @@ ALL_PRESETS=(
     in-key-a-minor
     dark-choir
     bright-angels
+    jazz-maj7
+    ominous-dim7
+    power-chord
     subtle-support
 )
 

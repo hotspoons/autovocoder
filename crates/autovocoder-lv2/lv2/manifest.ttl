@@ -56,6 +56,21 @@
     lv2:appliesTo <https://github.com/richsio/autovocoder> ;
     rdfs:seeAlso <presets.ttl> .
 
+<https://github.com/richsio/autovocoder#preset/jazz_cafe_maj7>
+    a pset:Preset ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    rdfs:seeAlso <presets.ttl> .
+
+<https://github.com/richsio/autovocoder#preset/ominous_dim7>
+    a pset:Preset ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    rdfs:seeAlso <presets.ttl> .
+
+<https://github.com/richsio/autovocoder#preset/power_chord_robot>
+    a pset:Preset ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    rdfs:seeAlso <presets.ttl> .
+
 <https://github.com/richsio/autovocoder#preset/subtle_support>
     a pset:Preset ;
     lv2:appliesTo <https://github.com/richsio/autovocoder> ;
