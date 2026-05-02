@@ -64,6 +64,46 @@ fn poly_blep(t: f32, dt: f32) -> f32 {
     }
 }
 
+/// Naive square oscillator for sub-octave duty.
+///
+/// Square waves alias hard at high frequencies, so this would be wrong for
+/// a primary carrier. We use it strictly as a sub-oscillator at half the
+/// carrier root — a 60 Hz fundamental's harmonics (180, 300, 420 …) all
+/// stay well below Nyquist, so naive is fine and the code stays trivial.
+pub struct SubSquare {
+    sample_rate: f32,
+    phase: f32,
+    freq_hz: f32,
+}
+
+impl SubSquare {
+    pub fn new(sample_rate: f32) -> Self {
+        Self {
+            sample_rate,
+            phase: 0.0,
+            freq_hz: 0.0,
+        }
+    }
+
+    pub fn set_frequency(&mut self, hz: f32) {
+        self.freq_hz = hz.max(0.0);
+    }
+
+    pub fn reset_phase(&mut self) {
+        self.phase = 0.0;
+    }
+
+    #[inline]
+    pub fn tick(&mut self) -> f32 {
+        let y = if self.phase < 0.5 { 1.0 } else { -1.0 };
+        self.phase += self.freq_hz / self.sample_rate;
+        if self.phase >= 1.0 {
+            self.phase -= 1.0;
+        }
+        y
+    }
+}
+
 /// Sine oscillator. Useful for tests and optional pure-tone carriers.
 pub struct Sine {
     sample_rate: f32,

@@ -4,7 +4,7 @@ A Rust auto-vocoder: pitch-detects the input voice, quantizes it to a scale,
 synthesizes a carrier (single note, triad, or fixed "Soundwave" pitch), and
 drives a classic 16-band channel vocoder. Ships as:
 
-- An **LV2 plugin** with 10 named presets (Ardour on Linux)
+- An **LV2 plugin** with 25 named presets (Ardour on Linux)
 - A **standalone CLI** for offline WAV rendering and live audio (Mac / Linux)
 - A **WASM** build for running in a webpage via AudioWorklet
 - A **shell wrapper** for routing a robot voice into Teams/Zoom/Discord on Mac
@@ -107,6 +107,25 @@ The LV2 plugin and the `robot-voice.sh` script share a curated preset set:
 | `dark-choir`       | Minor triad per detected note. Eerie pad effect.              |
 | `bright-angels`    | Major triad per detected note. Auto-Tune-on-steroids heaven.  |
 | `subtle-support`   | 30% wet — layer under a real vocal for harmonic reinforcement.|
+
+The LV2 plugin also bundles a set of effect-showcase presets that exercise
+the chorus / tremolo modules (LV2-only — the standalone CLI doesn't expose
+those parameters yet):
+
+| Preset                 | Flavor                                                              |
+|------------------------|---------------------------------------------------------------------|
+| `soundwave-stutter`    | Soundwave C2 + 8 Hz square chop. Mechanical staccato villain.       |
+| `liquid-carrier`       | Mono pitch tracking + deep chorus *on the carrier*. Watery timbre.  |
+| `wormhole`             | Fixed dim7 with both choruses deep + slow. Disorienting wash.       |
+| `helicopter`           | 14 Hz hard-square tremolo over chromatic mono. Rotor blades.        |
+| `trance-gate-c`        | Major-scale auto-tune + 6 Hz EDM gate + subtle output chorus.       |
+| `synthwave-pad`        | Sus2 fixed chord + lush slow output chorus. '80s pad.               |
+| `megatron`             | Low dom7 + slow square chop + carrier chorus. Heavier than Soundwave.|
+| `robotic-telegraph`    | Fixed A2 + 10 Hz square chop. Speech as Morse code.                 |
+| `tron-cycle`           | Low power chord + deep carrier chorus + slow sine tremolo.          |
+| `vintage-choir-wash`   | Major triad per note + subtle slow chorus. Mellotron-ish.           |
+| `glitch-bot`           | Augmented chord + 3.5 Hz hard chop + animated chorus. Rhythmic weird.|
+| `cyberbird`            | Mono + fast carrier chorus + subtle sine tremolo. Inhuman creature. |
 
 ## Architecture
 

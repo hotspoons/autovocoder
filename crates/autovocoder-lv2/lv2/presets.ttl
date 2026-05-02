@@ -9,6 +9,13 @@
 #   chord_type: 0=power 1=major 2=minor 3=sus2 4=sus4 5=dim 6=aug
 #               7=maj7 8=min7 9=dom7 10=dim7 11=halfdim7
 #               12=add9 13=dom9 14=min9
+#   pitch_algo: 0=YIN(classic) 1=YIN(FFT) 2=FFT(HPS)
+#
+# Effect presets below set every control port (including chorus + tremolo)
+# so loading them gives a known clean state regardless of what was loaded
+# before. The legacy presets above only set ports 0-13 — by default they
+# inherit whatever was set previously for the new effects, which is fine
+# in practice but documented here so it isn't a surprise.
 
 <https://github.com/richsio/autovocoder#preset/soundwave_c2>
     a pset:Preset ;
@@ -256,3 +263,355 @@
         [ lv2:symbol "comp_on"        ; pset:value 1    ] ,
         [ lv2:symbol "comp_threshold" ; pset:value -18.0 ] ,
         [ lv2:symbol "chord_type"     ; pset:value 1    ] .
+
+# ============================================================================
+#  Effect showcases — chorus + tremolo applied for character.
+# ============================================================================
+
+<https://github.com/richsio/autovocoder#preset/soundwave_stutter>
+    a pset:Preset ;
+    rdfs:label "Soundwave Stutter" ;
+    rdfs:comment "G1 Soundwave with a hard 8 Hz square chop. Each syllable gets sliced into staccato bursts — useful for villain monologues that need to feel mechanically interrupted." ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:port
+        [ lv2:symbol "mode"               ; pset:value 3    ] ,
+        [ lv2:symbol "fixed_note"         ; pset:value 36   ] ,
+        [ lv2:symbol "scale"              ; pset:value 0    ] ,
+        [ lv2:symbol "scale_root"         ; pset:value 0    ] ,
+        [ lv2:symbol "mix"                ; pset:value 1.0  ] ,
+        [ lv2:symbol "portamento"         ; pset:value 25.0 ] ,
+        [ lv2:symbol "carrier_level"      ; pset:value 0.6  ] ,
+        [ lv2:symbol "input_gain"         ; pset:value 9.0  ] ,
+        [ lv2:symbol "output_gain"        ; pset:value 6.0  ] ,
+        [ lv2:symbol "comp_on"            ; pset:value 1    ] ,
+        [ lv2:symbol "comp_threshold"     ; pset:value -18.0 ] ,
+        [ lv2:symbol "chord_type"         ; pset:value 2    ] ,
+        [ lv2:symbol "pitch_algo"         ; pset:value 1    ] ,
+        [ lv2:symbol "carrier_chorus_on"  ; pset:value 0    ] ,
+        [ lv2:symbol "output_chorus_on"   ; pset:value 0    ] ,
+        [ lv2:symbol "chorus_rate"        ; pset:value 0.7  ] ,
+        [ lv2:symbol "chorus_depth"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "chorus_mix"         ; pset:value 0.5  ] ,
+        [ lv2:symbol "trem_on"            ; pset:value 1    ] ,
+        [ lv2:symbol "trem_rate"          ; pset:value 8.0  ] ,
+        [ lv2:symbol "trem_depth"         ; pset:value 1.0  ] ,
+        [ lv2:symbol "trem_shape"         ; pset:value 1.0  ] .
+
+<https://github.com/richsio/autovocoder#preset/liquid_carrier>
+    a pset:Preset ;
+    rdfs:label "Liquid Carrier" ;
+    rdfs:comment "Mono pitch tracking with a deep slow chorus on the carrier — the modulation runs *before* the vocoder, so the vocoded voice itself has a watery animated timbre rather than a chorused-output gloss." ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:port
+        [ lv2:symbol "mode"               ; pset:value 0    ] ,
+        [ lv2:symbol "fixed_note"         ; pset:value 48   ] ,
+        [ lv2:symbol "scale"              ; pset:value 0    ] ,
+        [ lv2:symbol "scale_root"         ; pset:value 0    ] ,
+        [ lv2:symbol "mix"                ; pset:value 1.0  ] ,
+        [ lv2:symbol "portamento"         ; pset:value 40.0 ] ,
+        [ lv2:symbol "carrier_level"      ; pset:value 0.6  ] ,
+        [ lv2:symbol "input_gain"         ; pset:value 9.0  ] ,
+        [ lv2:symbol "output_gain"        ; pset:value 6.0  ] ,
+        [ lv2:symbol "comp_on"            ; pset:value 1    ] ,
+        [ lv2:symbol "comp_threshold"     ; pset:value -18.0 ] ,
+        [ lv2:symbol "chord_type"         ; pset:value 1    ] ,
+        [ lv2:symbol "pitch_algo"         ; pset:value 1    ] ,
+        [ lv2:symbol "carrier_chorus_on"  ; pset:value 1    ] ,
+        [ lv2:symbol "output_chorus_on"   ; pset:value 0    ] ,
+        [ lv2:symbol "chorus_rate"        ; pset:value 1.5  ] ,
+        [ lv2:symbol "chorus_depth"       ; pset:value 0.7  ] ,
+        [ lv2:symbol "chorus_mix"         ; pset:value 0.7  ] ,
+        [ lv2:symbol "trem_on"            ; pset:value 0    ] ,
+        [ lv2:symbol "trem_rate"          ; pset:value 5.0  ] ,
+        [ lv2:symbol "trem_depth"         ; pset:value 0.7  ] ,
+        [ lv2:symbol "trem_shape"         ; pset:value 0.0  ] .
+
+<https://github.com/richsio/autovocoder#preset/wormhole>
+    a pset:Preset ;
+    rdfs:label "Wormhole" ;
+    rdfs:comment "Fixed dim7 at E2 with both choruses running deep and slow. The two LFOs free-run, drifting in and out of phase — the result is a tonally-disorienting wash that's great under whispered narration." ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:port
+        [ lv2:symbol "mode"               ; pset:value 3    ] ,
+        [ lv2:symbol "fixed_note"         ; pset:value 40   ] ,
+        [ lv2:symbol "scale"              ; pset:value 0    ] ,
+        [ lv2:symbol "scale_root"         ; pset:value 0    ] ,
+        [ lv2:symbol "mix"                ; pset:value 1.0  ] ,
+        [ lv2:symbol "portamento"         ; pset:value 25.0 ] ,
+        [ lv2:symbol "carrier_level"      ; pset:value 0.55 ] ,
+        [ lv2:symbol "input_gain"         ; pset:value 9.0  ] ,
+        [ lv2:symbol "output_gain"        ; pset:value 6.0  ] ,
+        [ lv2:symbol "comp_on"            ; pset:value 1    ] ,
+        [ lv2:symbol "comp_threshold"     ; pset:value -18.0 ] ,
+        [ lv2:symbol "chord_type"         ; pset:value 10   ] ,
+        [ lv2:symbol "pitch_algo"         ; pset:value 1    ] ,
+        [ lv2:symbol "carrier_chorus_on"  ; pset:value 1    ] ,
+        [ lv2:symbol "output_chorus_on"   ; pset:value 1    ] ,
+        [ lv2:symbol "chorus_rate"        ; pset:value 0.4  ] ,
+        [ lv2:symbol "chorus_depth"       ; pset:value 1.0  ] ,
+        [ lv2:symbol "chorus_mix"         ; pset:value 0.6  ] ,
+        [ lv2:symbol "trem_on"            ; pset:value 0    ] ,
+        [ lv2:symbol "trem_rate"          ; pset:value 5.0  ] ,
+        [ lv2:symbol "trem_depth"         ; pset:value 0.7  ] ,
+        [ lv2:symbol "trem_shape"         ; pset:value 0.0  ] .
+
+<https://github.com/richsio/autovocoder#preset/helicopter>
+    a pset:Preset ;
+    rdfs:label "Helicopter" ;
+    rdfs:comment "Hard-square tremolo at 14 Hz over a chromatic mono carrier. Speech turns into rotor blades — pitch still tracks, but the gating is loud enough to dominate." ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:port
+        [ lv2:symbol "mode"               ; pset:value 0    ] ,
+        [ lv2:symbol "fixed_note"         ; pset:value 48   ] ,
+        [ lv2:symbol "scale"              ; pset:value 0    ] ,
+        [ lv2:symbol "scale_root"         ; pset:value 0    ] ,
+        [ lv2:symbol "mix"                ; pset:value 1.0  ] ,
+        [ lv2:symbol "portamento"         ; pset:value 8.0  ] ,
+        [ lv2:symbol "carrier_level"      ; pset:value 0.7  ] ,
+        [ lv2:symbol "input_gain"         ; pset:value 9.0  ] ,
+        [ lv2:symbol "output_gain"        ; pset:value 6.0  ] ,
+        [ lv2:symbol "comp_on"            ; pset:value 1    ] ,
+        [ lv2:symbol "comp_threshold"     ; pset:value -18.0 ] ,
+        [ lv2:symbol "chord_type"         ; pset:value 1    ] ,
+        [ lv2:symbol "pitch_algo"         ; pset:value 1    ] ,
+        [ lv2:symbol "carrier_chorus_on"  ; pset:value 0    ] ,
+        [ lv2:symbol "output_chorus_on"   ; pset:value 0    ] ,
+        [ lv2:symbol "chorus_rate"        ; pset:value 0.7  ] ,
+        [ lv2:symbol "chorus_depth"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "chorus_mix"         ; pset:value 0.5  ] ,
+        [ lv2:symbol "trem_on"            ; pset:value 1    ] ,
+        [ lv2:symbol "trem_rate"          ; pset:value 14.0 ] ,
+        [ lv2:symbol "trem_depth"         ; pset:value 1.0  ] ,
+        [ lv2:symbol "trem_shape"         ; pset:value 1.0  ] .
+
+<https://github.com/richsio/autovocoder#preset/trance_gate_c>
+    a pset:Preset ;
+    rdfs:label "Trance Gate (C Major)" ;
+    rdfs:comment "C-major auto-tune with a 6 Hz mostly-square gate plus a subtle output chorus. EDM sidechain feel without needing a sidechain. 4-on-the-floor not included." ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:port
+        [ lv2:symbol "mode"               ; pset:value 0    ] ,
+        [ lv2:symbol "fixed_note"         ; pset:value 48   ] ,
+        [ lv2:symbol "scale"              ; pset:value 1    ] ,
+        [ lv2:symbol "scale_root"         ; pset:value 0    ] ,
+        [ lv2:symbol "mix"                ; pset:value 1.0  ] ,
+        [ lv2:symbol "portamento"         ; pset:value 15.0 ] ,
+        [ lv2:symbol "carrier_level"      ; pset:value 0.65 ] ,
+        [ lv2:symbol "input_gain"         ; pset:value 9.0  ] ,
+        [ lv2:symbol "output_gain"        ; pset:value 6.0  ] ,
+        [ lv2:symbol "comp_on"            ; pset:value 1    ] ,
+        [ lv2:symbol "comp_threshold"     ; pset:value -18.0 ] ,
+        [ lv2:symbol "chord_type"         ; pset:value 1    ] ,
+        [ lv2:symbol "pitch_algo"         ; pset:value 1    ] ,
+        [ lv2:symbol "carrier_chorus_on"  ; pset:value 0    ] ,
+        [ lv2:symbol "output_chorus_on"   ; pset:value 1    ] ,
+        [ lv2:symbol "chorus_rate"        ; pset:value 0.3  ] ,
+        [ lv2:symbol "chorus_depth"       ; pset:value 0.3  ] ,
+        [ lv2:symbol "chorus_mix"         ; pset:value 0.3  ] ,
+        [ lv2:symbol "trem_on"            ; pset:value 1    ] ,
+        [ lv2:symbol "trem_rate"          ; pset:value 6.0  ] ,
+        [ lv2:symbol "trem_depth"         ; pset:value 0.85 ] ,
+        [ lv2:symbol "trem_shape"         ; pset:value 0.85 ] .
+
+<https://github.com/richsio/autovocoder#preset/synthwave_pad>
+    a pset:Preset ;
+    rdfs:label "Synthwave Pad" ;
+    rdfs:comment "Sus2 fixed chord at C3 with deep slow chorus on the output. Wide '80s pad — drape over an arpeggio or hold a single note for a long time." ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:port
+        [ lv2:symbol "mode"               ; pset:value 3    ] ,
+        [ lv2:symbol "fixed_note"         ; pset:value 48   ] ,
+        [ lv2:symbol "scale"              ; pset:value 0    ] ,
+        [ lv2:symbol "scale_root"         ; pset:value 0    ] ,
+        [ lv2:symbol "mix"                ; pset:value 1.0  ] ,
+        [ lv2:symbol "portamento"         ; pset:value 30.0 ] ,
+        [ lv2:symbol "carrier_level"      ; pset:value 0.55 ] ,
+        [ lv2:symbol "input_gain"         ; pset:value 9.0  ] ,
+        [ lv2:symbol "output_gain"        ; pset:value 6.0  ] ,
+        [ lv2:symbol "comp_on"            ; pset:value 1    ] ,
+        [ lv2:symbol "comp_threshold"     ; pset:value -18.0 ] ,
+        [ lv2:symbol "chord_type"         ; pset:value 3    ] ,
+        [ lv2:symbol "pitch_algo"         ; pset:value 1    ] ,
+        [ lv2:symbol "carrier_chorus_on"  ; pset:value 0    ] ,
+        [ lv2:symbol "output_chorus_on"   ; pset:value 1    ] ,
+        [ lv2:symbol "chorus_rate"        ; pset:value 0.4  ] ,
+        [ lv2:symbol "chorus_depth"       ; pset:value 0.9  ] ,
+        [ lv2:symbol "chorus_mix"         ; pset:value 0.7  ] ,
+        [ lv2:symbol "trem_on"            ; pset:value 0    ] ,
+        [ lv2:symbol "trem_rate"          ; pset:value 5.0  ] ,
+        [ lv2:symbol "trem_depth"         ; pset:value 0.7  ] ,
+        [ lv2:symbol "trem_shape"         ; pset:value 0.0  ] .
+
+<https://github.com/richsio/autovocoder#preset/megatron>
+    a pset:Preset ;
+    rdfs:label "Megatron" ;
+    rdfs:comment "A1 dominant-7th brawl with a slow square chop and a hint of carrier chorus. Heavier than Soundwave; less mech, more menace. Good for villains who don't need to stutter to be intimidating." ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:port
+        [ lv2:symbol "mode"               ; pset:value 3    ] ,
+        [ lv2:symbol "fixed_note"         ; pset:value 33   ] ,
+        [ lv2:symbol "scale"              ; pset:value 0    ] ,
+        [ lv2:symbol "scale_root"         ; pset:value 0    ] ,
+        [ lv2:symbol "mix"                ; pset:value 1.0  ] ,
+        [ lv2:symbol "portamento"         ; pset:value 25.0 ] ,
+        [ lv2:symbol "carrier_level"      ; pset:value 0.7  ] ,
+        [ lv2:symbol "input_gain"         ; pset:value 12.0 ] ,
+        [ lv2:symbol "output_gain"        ; pset:value 9.0  ] ,
+        [ lv2:symbol "comp_on"            ; pset:value 1    ] ,
+        [ lv2:symbol "comp_threshold"     ; pset:value -20.0 ] ,
+        [ lv2:symbol "chord_type"         ; pset:value 9    ] ,
+        [ lv2:symbol "pitch_algo"         ; pset:value 1    ] ,
+        [ lv2:symbol "carrier_chorus_on"  ; pset:value 1    ] ,
+        [ lv2:symbol "output_chorus_on"   ; pset:value 0    ] ,
+        [ lv2:symbol "chorus_rate"        ; pset:value 1.0  ] ,
+        [ lv2:symbol "chorus_depth"       ; pset:value 0.4  ] ,
+        [ lv2:symbol "chorus_mix"         ; pset:value 0.4  ] ,
+        [ lv2:symbol "trem_on"            ; pset:value 1    ] ,
+        [ lv2:symbol "trem_rate"          ; pset:value 3.0  ] ,
+        [ lv2:symbol "trem_depth"         ; pset:value 0.8  ] ,
+        [ lv2:symbol "trem_shape"         ; pset:value 0.7  ] .
+
+<https://github.com/richsio/autovocoder#preset/robotic_telegraph>
+    a pset:Preset ;
+    rdfs:label "Robotic Telegraph" ;
+    rdfs:comment "Fixed A2 with a 10 Hz mostly-square tremolo. Speech turns into staccato robot Morse — single sustained line, sliced into bursts that follow the rhythm of the LFO rather than the speaker." ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:port
+        [ lv2:symbol "mode"               ; pset:value 2    ] ,
+        [ lv2:symbol "fixed_note"         ; pset:value 45   ] ,
+        [ lv2:symbol "scale"              ; pset:value 0    ] ,
+        [ lv2:symbol "scale_root"         ; pset:value 0    ] ,
+        [ lv2:symbol "mix"                ; pset:value 1.0  ] ,
+        [ lv2:symbol "portamento"         ; pset:value 12.0 ] ,
+        [ lv2:symbol "carrier_level"      ; pset:value 0.7  ] ,
+        [ lv2:symbol "input_gain"         ; pset:value 9.0  ] ,
+        [ lv2:symbol "output_gain"        ; pset:value 6.0  ] ,
+        [ lv2:symbol "comp_on"            ; pset:value 1    ] ,
+        [ lv2:symbol "comp_threshold"     ; pset:value -18.0 ] ,
+        [ lv2:symbol "chord_type"         ; pset:value 1    ] ,
+        [ lv2:symbol "pitch_algo"         ; pset:value 1    ] ,
+        [ lv2:symbol "carrier_chorus_on"  ; pset:value 0    ] ,
+        [ lv2:symbol "output_chorus_on"   ; pset:value 0    ] ,
+        [ lv2:symbol "chorus_rate"        ; pset:value 0.7  ] ,
+        [ lv2:symbol "chorus_depth"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "chorus_mix"         ; pset:value 0.5  ] ,
+        [ lv2:symbol "trem_on"            ; pset:value 1    ] ,
+        [ lv2:symbol "trem_rate"          ; pset:value 10.0 ] ,
+        [ lv2:symbol "trem_depth"         ; pset:value 0.7  ] ,
+        [ lv2:symbol "trem_shape"         ; pset:value 0.9  ] .
+
+<https://github.com/richsio/autovocoder#preset/tron_cycle>
+    a pset:Preset ;
+    rdfs:label "Tron Cycle" ;
+    rdfs:comment "Low power-chord at F#1 with deep carrier chorus and a slow sine tremolo. Light-cycle hum during a long straight — should sit beneath sound design rather than on top of it." ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:port
+        [ lv2:symbol "mode"               ; pset:value 3    ] ,
+        [ lv2:symbol "fixed_note"         ; pset:value 30   ] ,
+        [ lv2:symbol "scale"              ; pset:value 0    ] ,
+        [ lv2:symbol "scale_root"         ; pset:value 0    ] ,
+        [ lv2:symbol "mix"                ; pset:value 1.0  ] ,
+        [ lv2:symbol "portamento"         ; pset:value 30.0 ] ,
+        [ lv2:symbol "carrier_level"      ; pset:value 0.65 ] ,
+        [ lv2:symbol "input_gain"         ; pset:value 9.0  ] ,
+        [ lv2:symbol "output_gain"        ; pset:value 6.0  ] ,
+        [ lv2:symbol "comp_on"            ; pset:value 1    ] ,
+        [ lv2:symbol "comp_threshold"     ; pset:value -18.0 ] ,
+        [ lv2:symbol "chord_type"         ; pset:value 0    ] ,
+        [ lv2:symbol "pitch_algo"         ; pset:value 1    ] ,
+        [ lv2:symbol "carrier_chorus_on"  ; pset:value 1    ] ,
+        [ lv2:symbol "output_chorus_on"   ; pset:value 0    ] ,
+        [ lv2:symbol "chorus_rate"        ; pset:value 0.6  ] ,
+        [ lv2:symbol "chorus_depth"       ; pset:value 0.9  ] ,
+        [ lv2:symbol "chorus_mix"         ; pset:value 0.7  ] ,
+        [ lv2:symbol "trem_on"            ; pset:value 1    ] ,
+        [ lv2:symbol "trem_rate"          ; pset:value 1.2  ] ,
+        [ lv2:symbol "trem_depth"         ; pset:value 0.4  ] ,
+        [ lv2:symbol "trem_shape"         ; pset:value 0.0  ] .
+
+<https://github.com/richsio/autovocoder#preset/vintage_choir_wash>
+    a pset:Preset ;
+    rdfs:label "Vintage Choir Wash" ;
+    rdfs:comment "Major triad per detected note plus a subtle slow chorus on the output. Thick vintage-mellotron-style choir without the cheese — sit it under a real lead vocal." ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:port
+        [ lv2:symbol "mode"               ; pset:value 1    ] ,
+        [ lv2:symbol "fixed_note"         ; pset:value 48   ] ,
+        [ lv2:symbol "scale"              ; pset:value 1    ] ,
+        [ lv2:symbol "scale_root"         ; pset:value 0    ] ,
+        [ lv2:symbol "mix"                ; pset:value 1.0  ] ,
+        [ lv2:symbol "portamento"         ; pset:value 35.0 ] ,
+        [ lv2:symbol "carrier_level"      ; pset:value 0.5  ] ,
+        [ lv2:symbol "input_gain"         ; pset:value 9.0  ] ,
+        [ lv2:symbol "output_gain"        ; pset:value 6.0  ] ,
+        [ lv2:symbol "comp_on"            ; pset:value 1    ] ,
+        [ lv2:symbol "comp_threshold"     ; pset:value -18.0 ] ,
+        [ lv2:symbol "chord_type"         ; pset:value 1    ] ,
+        [ lv2:symbol "pitch_algo"         ; pset:value 1    ] ,
+        [ lv2:symbol "carrier_chorus_on"  ; pset:value 0    ] ,
+        [ lv2:symbol "output_chorus_on"   ; pset:value 1    ] ,
+        [ lv2:symbol "chorus_rate"        ; pset:value 0.5  ] ,
+        [ lv2:symbol "chorus_depth"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "chorus_mix"         ; pset:value 0.5  ] ,
+        [ lv2:symbol "trem_on"            ; pset:value 0    ] ,
+        [ lv2:symbol "trem_rate"          ; pset:value 5.0  ] ,
+        [ lv2:symbol "trem_depth"         ; pset:value 0.7  ] ,
+        [ lv2:symbol "trem_shape"         ; pset:value 0.0  ] .
+
+<https://github.com/richsio/autovocoder#preset/glitch_bot>
+    a pset:Preset ;
+    rdfs:label "Glitch Bot" ;
+    rdfs:comment "Augmented chord at D3, slow sharp-edged chop, animated chorus on the output. Sounds like a rhythm preset that nobody asked for but everybody needs once." ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:port
+        [ lv2:symbol "mode"               ; pset:value 3    ] ,
+        [ lv2:symbol "fixed_note"         ; pset:value 50   ] ,
+        [ lv2:symbol "scale"              ; pset:value 0    ] ,
+        [ lv2:symbol "scale_root"         ; pset:value 0    ] ,
+        [ lv2:symbol "mix"                ; pset:value 1.0  ] ,
+        [ lv2:symbol "portamento"         ; pset:value 20.0 ] ,
+        [ lv2:symbol "carrier_level"      ; pset:value 0.6  ] ,
+        [ lv2:symbol "input_gain"         ; pset:value 9.0  ] ,
+        [ lv2:symbol "output_gain"        ; pset:value 6.0  ] ,
+        [ lv2:symbol "comp_on"            ; pset:value 1    ] ,
+        [ lv2:symbol "comp_threshold"     ; pset:value -18.0 ] ,
+        [ lv2:symbol "chord_type"         ; pset:value 6    ] ,
+        [ lv2:symbol "pitch_algo"         ; pset:value 1    ] ,
+        [ lv2:symbol "carrier_chorus_on"  ; pset:value 0    ] ,
+        [ lv2:symbol "output_chorus_on"   ; pset:value 1    ] ,
+        [ lv2:symbol "chorus_rate"        ; pset:value 1.1  ] ,
+        [ lv2:symbol "chorus_depth"       ; pset:value 0.6  ] ,
+        [ lv2:symbol "chorus_mix"         ; pset:value 0.5  ] ,
+        [ lv2:symbol "trem_on"            ; pset:value 1    ] ,
+        [ lv2:symbol "trem_rate"          ; pset:value 3.5  ] ,
+        [ lv2:symbol "trem_depth"         ; pset:value 0.9  ] ,
+        [ lv2:symbol "trem_shape"         ; pset:value 0.95 ] .
+
+<https://github.com/richsio/autovocoder#preset/cyberbird>
+    a pset:Preset ;
+    rdfs:label "Cyberbird" ;
+    rdfs:comment "Mono pitch tracking with a fast carrier chorus and a subtle sine tremolo. Unstable, animated — somewhere between chirping and singing. Useful for inhuman creature voicing without going full robot." ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:port
+        [ lv2:symbol "mode"               ; pset:value 0    ] ,
+        [ lv2:symbol "fixed_note"         ; pset:value 48   ] ,
+        [ lv2:symbol "scale"              ; pset:value 0    ] ,
+        [ lv2:symbol "scale_root"         ; pset:value 0    ] ,
+        [ lv2:symbol "mix"                ; pset:value 1.0  ] ,
+        [ lv2:symbol "portamento"         ; pset:value 10.0 ] ,
+        [ lv2:symbol "carrier_level"      ; pset:value 0.6  ] ,
+        [ lv2:symbol "input_gain"         ; pset:value 9.0  ] ,
+        [ lv2:symbol "output_gain"        ; pset:value 6.0  ] ,
+        [ lv2:symbol "comp_on"            ; pset:value 1    ] ,
+        [ lv2:symbol "comp_threshold"     ; pset:value -18.0 ] ,
+        [ lv2:symbol "chord_type"         ; pset:value 1    ] ,
+        [ lv2:symbol "pitch_algo"         ; pset:value 1    ] ,
+        [ lv2:symbol "carrier_chorus_on"  ; pset:value 1    ] ,
+        [ lv2:symbol "output_chorus_on"   ; pset:value 0    ] ,
+        [ lv2:symbol "chorus_rate"        ; pset:value 4.0  ] ,
+        [ lv2:symbol "chorus_depth"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "chorus_mix"         ; pset:value 0.5  ] ,
+        [ lv2:symbol "trem_on"            ; pset:value 1    ] ,
+        [ lv2:symbol "trem_rate"          ; pset:value 5.0  ] ,
+        [ lv2:symbol "trem_depth"         ; pset:value 0.3  ] ,
+        [ lv2:symbol "trem_shape"         ; pset:value 0.0  ] .

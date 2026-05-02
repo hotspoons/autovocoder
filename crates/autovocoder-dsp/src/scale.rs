@@ -24,7 +24,48 @@ impl Scale {
     }
 
     pub fn minor(root_pc: u8) -> Self {
+        // Natural minor: 0 2 3 5 7 8 10
         Self::from_pitch_classes_rotated(root_pc, &[0, 2, 3, 5, 7, 8, 10])
+    }
+
+    pub fn dorian(root_pc: u8) -> Self {
+        // Minor with raised 6: 0 2 3 5 7 9 10. Smooth, jazzy.
+        Self::from_pitch_classes_rotated(root_pc, &[0, 2, 3, 5, 7, 9, 10])
+    }
+
+    pub fn phrygian(root_pc: u8) -> Self {
+        // Minor with lowered 2: 0 1 3 5 7 8 10. Spanish / metal.
+        Self::from_pitch_classes_rotated(root_pc, &[0, 1, 3, 5, 7, 8, 10])
+    }
+
+    pub fn lydian(root_pc: u8) -> Self {
+        // Major with raised 4: 0 2 4 6 7 9 11. Dreamy / sci-fi.
+        Self::from_pitch_classes_rotated(root_pc, &[0, 2, 4, 6, 7, 9, 11])
+    }
+
+    pub fn mixolydian(root_pc: u8) -> Self {
+        // Major with lowered 7: 0 2 4 5 7 9 10. Bluesy / classic rock.
+        Self::from_pitch_classes_rotated(root_pc, &[0, 2, 4, 5, 7, 9, 10])
+    }
+
+    pub fn harmonic_minor(root_pc: u8) -> Self {
+        // Minor with raised 7: 0 2 3 5 7 8 11. Eastern / dramatic.
+        Self::from_pitch_classes_rotated(root_pc, &[0, 2, 3, 5, 7, 8, 11])
+    }
+
+    pub fn major_pentatonic(root_pc: u8) -> Self {
+        // 0 2 4 7 9. Always-safe melodies.
+        Self::from_pitch_classes_rotated(root_pc, &[0, 2, 4, 7, 9])
+    }
+
+    pub fn minor_pentatonic(root_pc: u8) -> Self {
+        // 0 3 5 7 10. Rock / blues lead bedrock.
+        Self::from_pitch_classes_rotated(root_pc, &[0, 3, 5, 7, 10])
+    }
+
+    pub fn blues(root_pc: u8) -> Self {
+        // Minor pentatonic + blue note: 0 3 5 6 7 10.
+        Self::from_pitch_classes_rotated(root_pc, &[0, 3, 5, 6, 7, 10])
     }
 
     fn from_pitch_classes_rotated(root: u8, intervals: &[u8]) -> Self {
@@ -33,6 +74,26 @@ impl Scale {
             mask |= 1 << ((root + i) % 12);
         }
         Self { mask }
+    }
+
+    /// LV2 port value → scale at the given root pitch class.
+    /// 0=Chromatic, 1=Major, 2=Minor, 3=Dorian, 4=Phrygian, 5=Lydian,
+    /// 6=Mixolydian, 7=Harmonic Minor, 8=Major Pentatonic,
+    /// 9=Minor Pentatonic, 10=Blues. Out-of-range falls back to Chromatic.
+    pub fn from_int(scale_kind: i32, root_pc: u8) -> Self {
+        match scale_kind {
+            1 => Self::major(root_pc),
+            2 => Self::minor(root_pc),
+            3 => Self::dorian(root_pc),
+            4 => Self::phrygian(root_pc),
+            5 => Self::lydian(root_pc),
+            6 => Self::mixolydian(root_pc),
+            7 => Self::harmonic_minor(root_pc),
+            8 => Self::major_pentatonic(root_pc),
+            9 => Self::minor_pentatonic(root_pc),
+            10 => Self::blues(root_pc),
+            _ => Self::CHROMATIC,
+        }
     }
 
     pub fn contains(&self, pc: u8) -> bool {

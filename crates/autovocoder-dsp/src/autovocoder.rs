@@ -1,10 +1,14 @@
 //! Top-level autovocoder: pitch-detect the voice, quantize to scale,
 //! synthesize a carrier, drive the vocoder.
 
+use crate::chorus::Chorus;
+use crate::crusher::BitCrusher;
 use crate::dynamics::{db_to_linear, Compressor};
-use crate::osc::Saw;
+use crate::osc::{Saw, SubSquare};
 use crate::pitch::{PitchAlgorithm, PitchDetector, PitchEstimate};
+use crate::saturate::{DriveMode, Saturator};
 use crate::scale::{midi_to_hz, quantize_hz_to_scale, Portamento, Scale};
+use crate::tremolo::{LfoTarget, Tremolo};
 use crate::vocoder::{Vocoder, VocoderConfig};
 
 /// Chord voicing — semitone intervals from the root. Up to 5 notes fit our
@@ -115,6 +119,33 @@ pub struct AutoVocoderConfig {
     pub compressor_enabled: bool,
     pub compressor_threshold_db: f32,
     pub output_gain_db: f32, // applied after the compressor (classic makeup)
+    // Chorus — single set of params drives two independent placements.
+    // `carrier_chorus_enabled` runs the chorus on the synthesized carrier
+    // before it hits the vocoder (animates the timbre of the vocoded voice).
+    // `output_chorus_enabled` is classic post-output chorus.
+    pub carrier_chorus_enabled: bool,
+    pub output_chorus_enabled: bool,
+    pub chorus_rate_hz: f32,
+    pub chorus_depth: f32, // normalized 0..1
+    pub chorus_mix: f32,   // dry/wet 0..1
+    // Tremolo — runs on the post-output signal. `shape` morphs sine→square.
+    pub tremolo_enabled: bool,
+    pub tremolo_rate_hz: f32,
+    pub tremolo_depth: f32, // 0..1; full = full chop
+    pub tremolo_shape: f32, // 0=sine, 1=near-square
+    pub tremolo_target: LfoTarget,
+    // Saturation — two placements share mode + drive amount.
+    pub pre_drive_enabled: bool,  // saturate the modulator before the vocoder
+    pub post_drive_enabled: bool, // saturate the final output
+    pub drive_mode: DriveMode,
+    pub drive_amount: f32, // 0..1
+    // Bit crusher on the output stage (after tremolo, before clamp).
+    pub crusher_enabled: bool,
+    pub crusher_bits: f32,    // 1..16
+    pub crusher_rate: f32,    // 0..1; 1=full sample rate
+    // Sub oscillator: square wave at half the carrier root.
+    pub sub_enabled: bool,
+    pub sub_level: f32, // 0..1, mixed into carrier_sum
 }
 
 impl Default for AutoVocoderConfig {
@@ -141,6 +172,27 @@ impl Default for AutoVocoderConfig {
             compressor_enabled: true,
             compressor_threshold_db: -18.0,
             output_gain_db: 6.0,
+            // All effects default to off — preserves the existing sound for
+            // existing presets. Users opt in via the LV2 toggles.
+            carrier_chorus_enabled: false,
+            output_chorus_enabled: false,
+            chorus_rate_hz: 0.7,
+            chorus_depth: 0.5,
+            chorus_mix: 0.5,
+            tremolo_enabled: false,
+            tremolo_rate_hz: 5.0,
+            tremolo_depth: 0.7,
+            tremolo_shape: 0.0,
+            tremolo_target: LfoTarget::Amplitude,
+            pre_drive_enabled: false,
+            post_drive_enabled: false,
+            drive_mode: DriveMode::Tape,
+            drive_amount: 0.5,
+            crusher_enabled: false,
+            crusher_bits: 16.0,
+            crusher_rate: 1.0,
+            sub_enabled: false,
+            sub_level: 0.5,
         }
     }
 }
@@ -171,6 +223,22 @@ pub struct AutoVocoder {
     mod_scratch: Vec<f32>,
     car_scratch: Vec<f32>,
     wet_scratch: Vec<f32>,
+    /// Pre-saturation copy of the modulator. Holds the clean voice for the
+    /// dry tap when pre-drive is engaged (otherwise unused).
+    dry_scratch: Vec<f32>,
+    // Effects. Two chorus instances so the two placements have un-correlated
+    // LFO drift even though they share user-facing rate/depth/mix params.
+    carrier_chorus: Chorus,
+    output_chorus: Chorus,
+    tremolo: Tremolo,
+    pre_drive: Saturator,
+    post_drive: Saturator,
+    crusher: BitCrusher,
+    sub_osc: SubSquare,
+    // Per-block scratch for the LFO. Filled in the pre-stage of the block
+    // path so non-amplitude targets can read precomputed values without
+    // double-ticking the LFO oscillator.
+    lfo_scratch: Vec<f32>,
 }
 
 impl AutoVocoder {
@@ -189,6 +257,34 @@ impl AutoVocoder {
         let portos: [Portamento; CARRIER_VOICES] =
             std::array::from_fn(|_| Portamento::new(sample_rate, cfg.portamento_ms));
         let (chord_ratios, voice_count, chord_norm) = compute_voicing(cfg.carrier_mode);
+        let mut carrier_chorus = Chorus::new(sample_rate);
+        let mut output_chorus = Chorus::new(sample_rate);
+        for c in [&mut carrier_chorus, &mut output_chorus] {
+            c.set_rate_hz(cfg.chorus_rate_hz);
+            c.set_depth(cfg.chorus_depth);
+            c.set_mix(cfg.chorus_mix);
+        }
+        carrier_chorus.set_enabled(cfg.carrier_chorus_enabled);
+        output_chorus.set_enabled(cfg.output_chorus_enabled);
+        let mut tremolo = Tremolo::new(sample_rate);
+        tremolo.set_rate_hz(cfg.tremolo_rate_hz);
+        tremolo.set_depth(cfg.tremolo_depth);
+        tremolo.set_shape(cfg.tremolo_shape);
+        tremolo.set_target(cfg.tremolo_target);
+        tremolo.set_enabled(cfg.tremolo_enabled);
+        let mut pre_drive = Saturator::new();
+        pre_drive.set_mode(cfg.drive_mode);
+        pre_drive.set_drive(cfg.drive_amount);
+        pre_drive.set_enabled(cfg.pre_drive_enabled);
+        let mut post_drive = Saturator::new();
+        post_drive.set_mode(cfg.drive_mode);
+        post_drive.set_drive(cfg.drive_amount);
+        post_drive.set_enabled(cfg.post_drive_enabled);
+        let mut crusher = BitCrusher::new();
+        crusher.set_bits(cfg.crusher_bits);
+        crusher.set_rate(cfg.crusher_rate);
+        crusher.set_enabled(cfg.crusher_enabled);
+        let sub_osc = SubSquare::new(sample_rate);
         Self {
             sample_rate,
             pitch,
@@ -207,6 +303,15 @@ impl AutoVocoder {
             mod_scratch: Vec::new(),
             car_scratch: Vec::new(),
             wet_scratch: Vec::new(),
+            dry_scratch: Vec::new(),
+            carrier_chorus,
+            output_chorus,
+            tremolo,
+            pre_drive,
+            post_drive,
+            crusher,
+            sub_osc,
+            lfo_scratch: Vec::new(),
             cfg,
         }
     }
@@ -269,6 +374,117 @@ impl AutoVocoder {
         self.compressor.set_threshold_db(db);
     }
 
+    // ---- Chorus. Two instances share rate/depth/mix; enables are independent.
+
+    pub fn set_carrier_chorus_enabled(&mut self, on: bool) {
+        self.cfg.carrier_chorus_enabled = on;
+        self.carrier_chorus.set_enabled(on);
+    }
+
+    pub fn set_output_chorus_enabled(&mut self, on: bool) {
+        self.cfg.output_chorus_enabled = on;
+        self.output_chorus.set_enabled(on);
+    }
+
+    pub fn set_chorus_rate_hz(&mut self, hz: f32) {
+        self.cfg.chorus_rate_hz = hz;
+        self.carrier_chorus.set_rate_hz(hz);
+        self.output_chorus.set_rate_hz(hz);
+    }
+
+    pub fn set_chorus_depth(&mut self, depth_0_1: f32) {
+        self.cfg.chorus_depth = depth_0_1;
+        self.carrier_chorus.set_depth(depth_0_1);
+        self.output_chorus.set_depth(depth_0_1);
+    }
+
+    pub fn set_chorus_mix(&mut self, mix_0_1: f32) {
+        self.cfg.chorus_mix = mix_0_1;
+        self.carrier_chorus.set_mix(mix_0_1);
+        self.output_chorus.set_mix(mix_0_1);
+    }
+
+    // ---- Tremolo. Single instance on the post-output signal.
+
+    pub fn set_tremolo_enabled(&mut self, on: bool) {
+        self.cfg.tremolo_enabled = on;
+        self.tremolo.set_enabled(on);
+    }
+
+    pub fn set_tremolo_rate_hz(&mut self, hz: f32) {
+        self.cfg.tremolo_rate_hz = hz;
+        self.tremolo.set_rate_hz(hz);
+    }
+
+    pub fn set_tremolo_depth(&mut self, depth_0_1: f32) {
+        self.cfg.tremolo_depth = depth_0_1;
+        self.tremolo.set_depth(depth_0_1);
+    }
+
+    pub fn set_tremolo_shape(&mut self, shape_0_1: f32) {
+        self.cfg.tremolo_shape = shape_0_1;
+        self.tremolo.set_shape(shape_0_1);
+    }
+
+    pub fn set_tremolo_target(&mut self, target: LfoTarget) {
+        self.cfg.tremolo_target = target;
+        self.tremolo.set_target(target);
+    }
+
+    // ---- Saturation. Two placements share mode + drive amount.
+
+    pub fn set_pre_drive_enabled(&mut self, on: bool) {
+        self.cfg.pre_drive_enabled = on;
+        self.pre_drive.set_enabled(on);
+    }
+
+    pub fn set_post_drive_enabled(&mut self, on: bool) {
+        self.cfg.post_drive_enabled = on;
+        self.post_drive.set_enabled(on);
+    }
+
+    pub fn set_drive_mode(&mut self, mode: DriveMode) {
+        self.cfg.drive_mode = mode;
+        self.pre_drive.set_mode(mode);
+        self.post_drive.set_mode(mode);
+    }
+
+    pub fn set_drive_amount(&mut self, amount: f32) {
+        self.cfg.drive_amount = amount;
+        self.pre_drive.set_drive(amount);
+        self.post_drive.set_drive(amount);
+    }
+
+    // ---- Bit crusher.
+
+    pub fn set_crusher_enabled(&mut self, on: bool) {
+        self.cfg.crusher_enabled = on;
+        self.crusher.set_enabled(on);
+    }
+
+    pub fn set_crusher_bits(&mut self, bits: f32) {
+        self.cfg.crusher_bits = bits;
+        self.crusher.set_bits(bits);
+    }
+
+    pub fn set_crusher_rate(&mut self, rate_0_1: f32) {
+        self.cfg.crusher_rate = rate_0_1;
+        self.crusher.set_rate(rate_0_1);
+    }
+
+    // ---- Sub oscillator.
+
+    pub fn set_sub_enabled(&mut self, on: bool) {
+        self.cfg.sub_enabled = on;
+        if !on {
+            self.sub_osc.reset_phase();
+        }
+    }
+
+    pub fn set_sub_level(&mut self, level: f32) {
+        self.cfg.sub_level = level.clamp(0.0, 1.0);
+    }
+
     pub fn set_pitch_algorithm(&mut self, algo: PitchAlgorithm) {
         if self.pitch.algorithm() == algo {
             return;
@@ -297,6 +513,11 @@ impl AutoVocoder {
         for p in &mut self.portos {
             p.reset();
         }
+        self.carrier_chorus.reset();
+        self.output_chorus.reset();
+        self.tremolo.reset();
+        self.crusher.reset();
+        self.sub_osc.reset_phase();
     }
 
     /// Refresh the cached quantized/fixed root if the voice pitch has changed
@@ -319,11 +540,18 @@ impl AutoVocoder {
     }
 
     /// Process one sample. Voice in → vocoded out.
+    ///
+    /// Signal flow (effects pass through when disabled):
+    ///   in × input_gain → YIN push (uses clean voice for pitch)
+    ///                  → pre-drive (saturates the modulator only)
+    ///   carrier synth → +sub_osc → ×carrier_level → carrier_chorus → vocoder
+    ///   dry voice + wet → compressor → output_gain → output_chorus
+    ///                  → amp tremolo → post-drive → bit crusher → clamp
+    /// The mod LFO ticks once per sample; whichever target is selected
+    /// reads from that single tick.
     pub fn process_sample(&mut self, voice: f32) -> f32 {
-        // Input stage: pre-gain the voice. This is the first line of
-        // defense against "everything too quiet" — a hot modulator drives
-        // the envelope followers harder, so the vocoder output itself is
-        // louder before any post-stage gain.
+        // Input stage. Pre-gain feeds YIN with a hot signal, which makes
+        // pitch detection more reliable for quiet sources.
         let voice = voice * self.input_gain;
 
         if let Some(est) = self.pitch.push(voice) {
@@ -333,7 +561,22 @@ impl AutoVocoder {
         }
 
         self.refresh_root();
-        let root = self.cached_root_hz;
+        // One LFO tick. Cheap when disabled (returns 0.0, no phase advance).
+        let lfo = self.tremolo.tick_lfo();
+        let target = self.tremolo.target();
+
+        let pitch_mult = if target == LfoTarget::Pitch {
+            self.tremolo.pitch_mult(lfo)
+        } else {
+            1.0
+        };
+        let level_mult = if target == LfoTarget::CarrierLevel {
+            self.tremolo.carrier_level_mult(lfo)
+        } else {
+            1.0
+        };
+
+        let root = self.cached_root_hz * pitch_mult;
         let mut carrier_sum = 0.0;
         if root > 0.0 {
             for ((osc, porto), &ratio) in self
@@ -350,19 +593,51 @@ impl AutoVocoder {
                 carrier_sum += osc.tick();
             }
             carrier_sum *= self.chord_norm;
+            // Sub-square at half the (vibrato-modulated) root. Mixed in
+            // *after* chord normalization so its level reads consistently
+            // regardless of how many chord voices are active.
+            if self.cfg.sub_enabled {
+                self.sub_osc.set_frequency(root * 0.5);
+                carrier_sum += self.sub_osc.tick() * self.cfg.sub_level;
+            } else {
+                // Keep phase coherent for the next time it's enabled.
+                self.sub_osc.set_frequency(0.0);
+                let _ = self.sub_osc.tick();
+            }
         }
-        carrier_sum *= self.cfg.carrier_level;
+        carrier_sum *= self.cfg.carrier_level * level_mult;
+        let carrier_sum = self.carrier_chorus.process_sample(carrier_sum);
 
-        let wet = self.vocoder.process(voice, carrier_sum);
-        let mix = self.cfg.dry_wet;
+        // Modulator path: optional pre-vocoder saturation. Coloring the
+        // modulator changes the envelope followers' input, which shifts
+        // the vocoder character without affecting pitch detection (already
+        // done above on the clean signal).
+        let modulator = self.pre_drive.process_sample(voice);
+        let wet = self.vocoder.process(modulator, carrier_sum);
+
+        // Dry/wet mix. Dry tap uses the *clean* voice (post-input-gain,
+        // pre-saturation) so the dry side stays untouched.
+        let mix = if target == LfoTarget::DryWet {
+            (self.cfg.dry_wet + self.tremolo.drywet_offset(lfo)).clamp(0.0, 1.0)
+        } else {
+            self.cfg.dry_wet
+        };
         let mixed = voice * (1.0 - mix) + wet * mix;
 
-        // Output stage: compressor catches peaks from the boosted signal,
-        // then output_gain acts as classic post-compressor makeup. Final
-        // soft-clamp is belt-and-suspenders for extreme gain settings.
+        // Output stage. compressor → makeup → output_chorus → amp tremolo
+        // → post-drive (overdrive after modulation, like a pedalboard) →
+        // bit crusher → soft clamp.
         let compressed = self.compressor.process(mixed);
-        let out = compressed * self.output_gain;
-        out.clamp(-0.98, 0.98)
+        let gained = compressed * self.output_gain;
+        let chorused = self.output_chorus.process_sample(gained);
+        let tremmed = if target == LfoTarget::Amplitude && self.tremolo.enabled() {
+            chorused * self.tremolo.amp_gain(lfo)
+        } else {
+            chorused
+        };
+        let driven = self.post_drive.process_sample(tremmed);
+        let crushed = self.crusher.process_sample(driven);
+        crushed.clamp(-0.98, 0.98)
     }
 
     /// Process a buffer in place for convenience.
@@ -393,16 +668,23 @@ impl AutoVocoder {
             self.mod_scratch.resize(n, 0.0);
             self.car_scratch.resize(n, 0.0);
             self.wet_scratch.resize(n, 0.0);
+            self.dry_scratch.resize(n, 0.0);
+            self.lfo_scratch.resize(n, 0.0);
         }
 
+        let target = self.tremolo.target();
+
         // ---- Pass 1: pre-stage. Per-sample because YIN + portamento +
-        // oscillator phase are inherently sequential. Borrow scratch in a
-        // tight scope so subsequent passes can re-borrow `self`.
+        // oscillator phase + the LFO are inherently sequential. Borrow
+        // scratch in a tight scope so subsequent passes can re-borrow `self`.
         {
             let mod_buf = &mut self.mod_scratch[..n];
             let car_buf = &mut self.car_scratch[..n];
+            let lfo_buf = &mut self.lfo_scratch[..n];
             let input_gain = self.input_gain;
-            let carrier_level = self.cfg.carrier_level;
+            let base_carrier_level = self.cfg.carrier_level;
+            let sub_enabled = self.cfg.sub_enabled;
+            let sub_level = self.cfg.sub_level;
             for i in 0..n {
                 let v = input[i] * input_gain;
                 if let Some(est) = self.pitch.push(v) {
@@ -410,8 +692,8 @@ impl AutoVocoder {
                         self.last_pitch = est;
                     }
                 }
-                // Inline `refresh_root` — `self` is otherwise unborrowable
-                // here because we hold mod_buf / car_buf above.
+                // Inline `refresh_root` — borrow checker can't see through
+                // the slices above to call the method.
                 if self.cached_for_pitch_hz != self.last_pitch.hz {
                     self.cached_root_hz = match self.cfg.carrier_mode {
                         CarrierMode::Mono | CarrierMode::Chord(_) => {
@@ -422,7 +704,24 @@ impl AutoVocoder {
                     };
                     self.cached_for_pitch_hz = self.last_pitch.hz;
                 }
-                let root = self.cached_root_hz;
+
+                // Tick the LFO once per sample. Result reused below for
+                // pitch / carrier-level targets and stashed for post-stage
+                // dry/wet and amplitude targets.
+                let lfo = self.tremolo.tick_lfo();
+                lfo_buf[i] = lfo;
+                let pitch_mult = if target == LfoTarget::Pitch {
+                    self.tremolo.pitch_mult(lfo)
+                } else {
+                    1.0
+                };
+                let level_mult = if target == LfoTarget::CarrierLevel {
+                    self.tremolo.carrier_level_mult(lfo)
+                } else {
+                    1.0
+                };
+
+                let root = self.cached_root_hz * pitch_mult;
                 let mut carrier = 0.0;
                 if root > 0.0 {
                     for ((osc, porto), &ratio) in self
@@ -439,32 +738,82 @@ impl AutoVocoder {
                         carrier += osc.tick();
                     }
                     carrier *= self.chord_norm;
+                    if sub_enabled {
+                        self.sub_osc.set_frequency(root * 0.5);
+                        carrier += self.sub_osc.tick() * sub_level;
+                    } else {
+                        self.sub_osc.set_frequency(0.0);
+                        let _ = self.sub_osc.tick();
+                    }
                 }
                 mod_buf[i] = v;
-                car_buf[i] = carrier * carrier_level;
+                car_buf[i] = carrier * base_carrier_level * level_mult;
             }
         }
 
-        // ---- Pass 2: vocoder, band-major.
+        // ---- Pass 2a: carrier chorus on the carrier buffer.
+        self.carrier_chorus.process_block(&mut self.car_scratch[..n]);
+
+        // ---- Pass 2b: pre-vocoder saturation on the modulator. The dry
+        // tap downstream needs the clean signal, so when pre-drive is on
+        // we keep a copy in `dry_scratch` and saturate `mod_scratch` in
+        // place. When pre-drive is off, both paths see the same clean
+        // signal and we skip the copy entirely.
+        let dry_is_separate = self.pre_drive.enabled();
+        if dry_is_separate {
+            self.dry_scratch[..n].copy_from_slice(&self.mod_scratch[..n]);
+            self.pre_drive.process_block(&mut self.mod_scratch[..n]);
+        }
+
+        // ---- Pass 2c: vocoder, band-major.
         self.vocoder.process_block(
             &self.mod_scratch[..n],
             &self.car_scratch[..n],
             &mut self.wet_scratch[..n],
         );
 
-        // ---- Pass 3: post-stage.
-        let mix = self.cfg.dry_wet;
-        let dry_g = 1.0 - mix;
-        let output_gain = self.output_gain;
-        let mod_buf = &self.mod_scratch[..n];
+        // ---- Pass 3a: dry/wet mix. Pull dry from dry_scratch (clean) when
+        // pre-drive ran, otherwise from mod_scratch.
+        let mix_base = self.cfg.dry_wet;
+        let dry_buf: &[f32] = if dry_is_separate {
+            &self.dry_scratch[..n]
+        } else {
+            &self.mod_scratch[..n]
+        };
         let wet_buf = &self.wet_scratch[..n];
+        let lfo_buf = &self.lfo_scratch[..n];
+        let trem = &self.tremolo;
         for i in 0..n {
-            let mixed = mod_buf[i] * dry_g + wet_buf[i] * mix;
-            let compressed = self.compressor.process(mixed);
-            output[i] = (compressed * output_gain).clamp(-0.98, 0.98);
+            let m = if target == LfoTarget::DryWet {
+                (mix_base + trem.drywet_offset(lfo_buf[i])).clamp(0.0, 1.0)
+            } else {
+                mix_base
+            };
+            output[i] = dry_buf[i] * (1.0 - m) + wet_buf[i] * m;
+        }
+
+        // ---- Pass 3: compressor + makeup gain (per-sample, sequential).
+        let output_gain = self.output_gain;
+        for s in output[..n].iter_mut() {
+            *s = self.compressor.process(*s) * output_gain;
+        }
+
+        // ---- Pass 4: output chorus, then amplitude tremolo (if that's the
+        // target), then post-drive, then crusher, then soft clamp.
+        self.output_chorus.process_block(&mut output[..n]);
+        if target == LfoTarget::Amplitude && self.tremolo.enabled() {
+            for (s, &lfo) in output[..n].iter_mut().zip(self.lfo_scratch[..n].iter()) {
+                *s *= self.tremolo.amp_gain(lfo);
+            }
+        }
+        self.post_drive.process_block(&mut output[..n]);
+        self.crusher.process_block(&mut output[..n]);
+        for s in output[..n].iter_mut() {
+            *s = s.clamp(-0.98, 0.98);
         }
     }
 }
+
 
 /// Voicing → (per-voice frequency ratios, voice count, output normalization).
 /// Lifted out of the per-sample path because chord intervals are constants —

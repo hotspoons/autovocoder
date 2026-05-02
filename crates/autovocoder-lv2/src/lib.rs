@@ -20,11 +20,33 @@
 //!  12  CompThreshold (float -40..0 dB; compressor threshold)
 //!  13  ChordType     (int 0..14; voicing for Chord / FixedChord modes)
 //!  14  PitchAlgo     (int 0=YinClassic, 1=YinFft, 2=FftPeak)
+//!  15  CarrierChorusOn (int 0/1; chorus on the synthesized carrier pre-vocoder)
+//!  16  OutputChorusOn  (int 0/1; chorus on the post-output signal)
+//!  17  ChorusRate    (float 0.05..5 Hz; shared between both chorus instances)
+//!  18  ChorusDepth   (float 0..1)
+//!  19  ChorusMix     (float 0..1)
+//!  20  TremOn        (int 0/1; output amplitude modulator)
+//!  21  TremRate      (float 0.1..20 Hz)
+//!  22  TremDepth     (float 0..1)
+//!  23  TremShape     (float 0..1; sine ↔ near-square morph)
+//!  24  TremTarget    (int 0=Amp, 1=Pitch, 2=DryWet, 3=CarrierLevel)
+//!  25  PreDriveOn    (int 0/1; saturate the modulator before vocoding)
+//!  26  PostDriveOn   (int 0/1; saturate the final output)
+//!  27  DriveMode     (int 0=Tube, 1=Tape, 2=Fuzz)
+//!  28  DriveAmount   (float 0..1)
+//!  29  CrusherOn     (int 0/1)
+//!  30  CrusherBits   (int 1..16; lower = more crush)
+//!  31  CrusherRate   (float 0..1; 1=full sample rate)
+//!  32  SubOn         (int 0/1; square wave at half the carrier root)
+//!  33  SubLevel      (float 0..1)
 
 #![allow(non_camel_case_types)]
 #![allow(clippy::missing_safety_doc)]
 
-use autovocoder_dsp::{AutoVocoder, AutoVocoderConfig, CarrierMode, ChordVoicing, PitchAlgorithm, Scale};
+use autovocoder_dsp::{
+    AutoVocoder, AutoVocoderConfig, CarrierMode, ChordVoicing, DriveMode, LfoTarget,
+    PitchAlgorithm, Scale,
+};
 use std::ffi::{c_char, c_void, CStr};
 use std::ptr;
 
@@ -78,6 +100,25 @@ const PORT_COMP_ON: u32 = 11;
 const PORT_COMP_THRESHOLD: u32 = 12;
 const PORT_CHORD_TYPE: u32 = 13;
 const PORT_PITCH_ALGO: u32 = 14;
+const PORT_CARRIER_CHORUS_ON: u32 = 15;
+const PORT_OUTPUT_CHORUS_ON: u32 = 16;
+const PORT_CHORUS_RATE: u32 = 17;
+const PORT_CHORUS_DEPTH: u32 = 18;
+const PORT_CHORUS_MIX: u32 = 19;
+const PORT_TREM_ON: u32 = 20;
+const PORT_TREM_RATE: u32 = 21;
+const PORT_TREM_DEPTH: u32 = 22;
+const PORT_TREM_SHAPE: u32 = 23;
+const PORT_TREM_TARGET: u32 = 24;
+const PORT_PRE_DRIVE_ON: u32 = 25;
+const PORT_POST_DRIVE_ON: u32 = 26;
+const PORT_DRIVE_MODE: u32 = 27;
+const PORT_DRIVE_AMOUNT: u32 = 28;
+const PORT_CRUSHER_ON: u32 = 29;
+const PORT_CRUSHER_BITS: u32 = 30;
+const PORT_CRUSHER_RATE: u32 = 31;
+const PORT_SUB_ON: u32 = 32;
+const PORT_SUB_LEVEL: u32 = 33;
 
 struct Plugin {
     av: AutoVocoder,
@@ -100,6 +141,25 @@ struct Plugin {
     comp_threshold: *const f32,
     chord_type: *const f32,
     pitch_algo: *const f32,
+    carrier_chorus_on: *const f32,
+    output_chorus_on: *const f32,
+    chorus_rate: *const f32,
+    chorus_depth: *const f32,
+    chorus_mix: *const f32,
+    trem_on: *const f32,
+    trem_rate: *const f32,
+    trem_depth: *const f32,
+    trem_shape: *const f32,
+    trem_target: *const f32,
+    pre_drive_on: *const f32,
+    post_drive_on: *const f32,
+    drive_mode: *const f32,
+    drive_amount: *const f32,
+    crusher_on: *const f32,
+    crusher_bits: *const f32,
+    crusher_rate: *const f32,
+    sub_on: *const f32,
+    sub_level: *const f32,
 
     // Last-seen values, so we only push into DSP on change (cheap RT-safe).
     last_mode: i32,
@@ -115,6 +175,25 @@ struct Plugin {
     last_comp_threshold: f32,
     last_chord_type: i32,
     last_pitch_algo: i32,
+    last_carrier_chorus_on: i32,
+    last_output_chorus_on: i32,
+    last_chorus_rate: f32,
+    last_chorus_depth: f32,
+    last_chorus_mix: f32,
+    last_trem_on: i32,
+    last_trem_rate: f32,
+    last_trem_depth: f32,
+    last_trem_shape: f32,
+    last_trem_target: i32,
+    last_pre_drive_on: i32,
+    last_post_drive_on: i32,
+    last_drive_mode: i32,
+    last_drive_amount: f32,
+    last_crusher_on: i32,
+    last_crusher_bits: i32,
+    last_crusher_rate: f32,
+    last_sub_on: i32,
+    last_sub_level: f32,
 }
 
 unsafe extern "C" fn instantiate(
@@ -142,6 +221,25 @@ unsafe extern "C" fn instantiate(
         comp_threshold: ptr::null(),
         chord_type: ptr::null(),
         pitch_algo: ptr::null(),
+        carrier_chorus_on: ptr::null(),
+        output_chorus_on: ptr::null(),
+        chorus_rate: ptr::null(),
+        chorus_depth: ptr::null(),
+        chorus_mix: ptr::null(),
+        trem_on: ptr::null(),
+        trem_rate: ptr::null(),
+        trem_depth: ptr::null(),
+        trem_shape: ptr::null(),
+        trem_target: ptr::null(),
+        pre_drive_on: ptr::null(),
+        post_drive_on: ptr::null(),
+        drive_mode: ptr::null(),
+        drive_amount: ptr::null(),
+        crusher_on: ptr::null(),
+        crusher_bits: ptr::null(),
+        crusher_rate: ptr::null(),
+        sub_on: ptr::null(),
+        sub_level: ptr::null(),
         last_mode: -1,
         last_fixed_note: -1,
         last_scale_kind: -1,
@@ -155,6 +253,25 @@ unsafe extern "C" fn instantiate(
         last_comp_threshold: f32::NAN,
         last_chord_type: -1,
         last_pitch_algo: -1,
+        last_carrier_chorus_on: -1,
+        last_output_chorus_on: -1,
+        last_chorus_rate: f32::NAN,
+        last_chorus_depth: f32::NAN,
+        last_chorus_mix: f32::NAN,
+        last_trem_on: -1,
+        last_trem_rate: f32::NAN,
+        last_trem_depth: f32::NAN,
+        last_trem_shape: f32::NAN,
+        last_trem_target: -1,
+        last_pre_drive_on: -1,
+        last_post_drive_on: -1,
+        last_drive_mode: -1,
+        last_drive_amount: f32::NAN,
+        last_crusher_on: -1,
+        last_crusher_bits: -1,
+        last_crusher_rate: f32::NAN,
+        last_sub_on: -1,
+        last_sub_level: f32::NAN,
     });
     Box::into_raw(p) as LV2_Handle
 }
@@ -177,6 +294,25 @@ unsafe extern "C" fn connect_port(instance: LV2_Handle, port: u32, data: *mut c_
         PORT_COMP_THRESHOLD => p.comp_threshold = data as *const f32,
         PORT_CHORD_TYPE => p.chord_type = data as *const f32,
         PORT_PITCH_ALGO => p.pitch_algo = data as *const f32,
+        PORT_CARRIER_CHORUS_ON => p.carrier_chorus_on = data as *const f32,
+        PORT_OUTPUT_CHORUS_ON => p.output_chorus_on = data as *const f32,
+        PORT_CHORUS_RATE => p.chorus_rate = data as *const f32,
+        PORT_CHORUS_DEPTH => p.chorus_depth = data as *const f32,
+        PORT_CHORUS_MIX => p.chorus_mix = data as *const f32,
+        PORT_TREM_ON => p.trem_on = data as *const f32,
+        PORT_TREM_RATE => p.trem_rate = data as *const f32,
+        PORT_TREM_DEPTH => p.trem_depth = data as *const f32,
+        PORT_TREM_SHAPE => p.trem_shape = data as *const f32,
+        PORT_TREM_TARGET => p.trem_target = data as *const f32,
+        PORT_PRE_DRIVE_ON => p.pre_drive_on = data as *const f32,
+        PORT_POST_DRIVE_ON => p.post_drive_on = data as *const f32,
+        PORT_DRIVE_MODE => p.drive_mode = data as *const f32,
+        PORT_DRIVE_AMOUNT => p.drive_amount = data as *const f32,
+        PORT_CRUSHER_ON => p.crusher_on = data as *const f32,
+        PORT_CRUSHER_BITS => p.crusher_bits = data as *const f32,
+        PORT_CRUSHER_RATE => p.crusher_rate = data as *const f32,
+        PORT_SUB_ON => p.sub_on = data as *const f32,
+        PORT_SUB_LEVEL => p.sub_level = data as *const f32,
         _ => {}
     }
 }
@@ -227,11 +363,7 @@ unsafe fn apply_controls(p: &mut Plugin) {
 
     if scale_i != p.last_scale_kind || root_i != p.last_scale_root {
         let root_pc = root_i.rem_euclid(12) as u8;
-        p.av.set_scale(match scale_i {
-            1 => Scale::major(root_pc),
-            2 => Scale::minor(root_pc),
-            _ => Scale::CHROMATIC,
-        });
+        p.av.set_scale(Scale::from_int(scale_i, root_pc));
         p.last_scale_kind = scale_i;
         p.last_scale_root = root_i;
     }
@@ -281,6 +413,120 @@ unsafe fn apply_controls(p: &mut Plugin) {
     if algo_i != p.last_pitch_algo {
         p.av.set_pitch_algorithm(PitchAlgorithm::from_int(algo_i));
         p.last_pitch_algo = algo_i;
+    }
+
+    // Chorus.
+    let cc_on = read_int(p.carrier_chorus_on, p.last_carrier_chorus_on.max(0));
+    if cc_on != p.last_carrier_chorus_on {
+        p.av.set_carrier_chorus_enabled(cc_on != 0);
+        p.last_carrier_chorus_on = cc_on;
+    }
+    let oc_on = read_int(p.output_chorus_on, p.last_output_chorus_on.max(0));
+    if oc_on != p.last_output_chorus_on {
+        p.av.set_output_chorus_enabled(oc_on != 0);
+        p.last_output_chorus_on = oc_on;
+    }
+    if let Some(v) = read_float(p.chorus_rate) {
+        if (v - p.last_chorus_rate).abs() > 1e-3 {
+            p.av.set_chorus_rate_hz(v);
+            p.last_chorus_rate = v;
+        }
+    }
+    if let Some(v) = read_float(p.chorus_depth) {
+        if (v - p.last_chorus_depth).abs() > 1e-4 {
+            p.av.set_chorus_depth(v);
+            p.last_chorus_depth = v;
+        }
+    }
+    if let Some(v) = read_float(p.chorus_mix) {
+        if (v - p.last_chorus_mix).abs() > 1e-4 {
+            p.av.set_chorus_mix(v);
+            p.last_chorus_mix = v;
+        }
+    }
+
+    // Tremolo.
+    let trem_on = read_int(p.trem_on, p.last_trem_on.max(0));
+    if trem_on != p.last_trem_on {
+        p.av.set_tremolo_enabled(trem_on != 0);
+        p.last_trem_on = trem_on;
+    }
+    if let Some(v) = read_float(p.trem_rate) {
+        if (v - p.last_trem_rate).abs() > 1e-3 {
+            p.av.set_tremolo_rate_hz(v);
+            p.last_trem_rate = v;
+        }
+    }
+    if let Some(v) = read_float(p.trem_depth) {
+        if (v - p.last_trem_depth).abs() > 1e-4 {
+            p.av.set_tremolo_depth(v);
+            p.last_trem_depth = v;
+        }
+    }
+    if let Some(v) = read_float(p.trem_shape) {
+        if (v - p.last_trem_shape).abs() > 1e-4 {
+            p.av.set_tremolo_shape(v);
+            p.last_trem_shape = v;
+        }
+    }
+    let trem_target_i = read_int(p.trem_target, p.last_trem_target.max(0));
+    if trem_target_i != p.last_trem_target {
+        p.av.set_tremolo_target(LfoTarget::from_int(trem_target_i));
+        p.last_trem_target = trem_target_i;
+    }
+
+    // Saturation.
+    let pre_on = read_int(p.pre_drive_on, p.last_pre_drive_on.max(0));
+    if pre_on != p.last_pre_drive_on {
+        p.av.set_pre_drive_enabled(pre_on != 0);
+        p.last_pre_drive_on = pre_on;
+    }
+    let post_on = read_int(p.post_drive_on, p.last_post_drive_on.max(0));
+    if post_on != p.last_post_drive_on {
+        p.av.set_post_drive_enabled(post_on != 0);
+        p.last_post_drive_on = post_on;
+    }
+    let drive_mode_i = read_int(p.drive_mode, p.last_drive_mode.max(0));
+    if drive_mode_i != p.last_drive_mode {
+        p.av.set_drive_mode(DriveMode::from_int(drive_mode_i));
+        p.last_drive_mode = drive_mode_i;
+    }
+    if let Some(v) = read_float(p.drive_amount) {
+        if (v - p.last_drive_amount).abs() > 1e-4 {
+            p.av.set_drive_amount(v);
+            p.last_drive_amount = v;
+        }
+    }
+
+    // Bit crusher.
+    let crusher_on_i = read_int(p.crusher_on, p.last_crusher_on.max(0));
+    if crusher_on_i != p.last_crusher_on {
+        p.av.set_crusher_enabled(crusher_on_i != 0);
+        p.last_crusher_on = crusher_on_i;
+    }
+    let crusher_bits_i = read_int(p.crusher_bits, p.last_crusher_bits.max(0));
+    if crusher_bits_i != p.last_crusher_bits {
+        p.av.set_crusher_bits(crusher_bits_i as f32);
+        p.last_crusher_bits = crusher_bits_i;
+    }
+    if let Some(v) = read_float(p.crusher_rate) {
+        if (v - p.last_crusher_rate).abs() > 1e-4 {
+            p.av.set_crusher_rate(v);
+            p.last_crusher_rate = v;
+        }
+    }
+
+    // Sub oscillator.
+    let sub_on_i = read_int(p.sub_on, p.last_sub_on.max(0));
+    if sub_on_i != p.last_sub_on {
+        p.av.set_sub_enabled(sub_on_i != 0);
+        p.last_sub_on = sub_on_i;
+    }
+    if let Some(v) = read_float(p.sub_level) {
+        if (v - p.last_sub_level).abs() > 1e-4 {
+            p.av.set_sub_level(v);
+            p.last_sub_level = v;
+        }
     }
 }
 

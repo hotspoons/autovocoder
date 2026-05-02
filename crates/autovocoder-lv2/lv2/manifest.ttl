@@ -75,3 +75,65 @@
     a pset:Preset ;
     lv2:appliesTo <https://github.com/richsio/autovocoder> ;
     rdfs:seeAlso <presets.ttl> .
+
+# --- Effect showcases ---
+
+<https://github.com/richsio/autovocoder#preset/soundwave_stutter>
+    a pset:Preset ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    rdfs:seeAlso <presets.ttl> .
+
+<https://github.com/richsio/autovocoder#preset/liquid_carrier>
+    a pset:Preset ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    rdfs:seeAlso <presets.ttl> .
+
+<https://github.com/richsio/autovocoder#preset/wormhole>
+    a pset:Preset ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    rdfs:seeAlso <presets.ttl> .
+
+<https://github.com/richsio/autovocoder#preset/helicopter>
+    a pset:Preset ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    rdfs:seeAlso <presets.ttl> .
+
+<https://github.com/richsio/autovocoder#preset/trance_gate_c>
+    a pset:Preset ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    rdfs:seeAlso <presets.ttl> .
+
+<https://github.com/richsio/autovocoder#preset/synthwave_pad>
+    a pset:Preset ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    rdfs:seeAlso <presets.ttl> .
+
+<https://github.com/richsio/autovocoder#preset/megatron>
+    a pset:Preset ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    rdfs:seeAlso <presets.ttl> .
+
+<https://github.com/richsio/autovocoder#preset/robotic_telegraph>
+    a pset:Preset ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    rdfs:seeAlso <presets.ttl> .
+
+<https://github.com/richsio/autovocoder#preset/tron_cycle>
+    a pset:Preset ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    rdfs:seeAlso <presets.ttl> .
+
+<https://github.com/richsio/autovocoder#preset/vintage_choir_wash>
+    a pset:Preset ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    rdfs:seeAlso <presets.ttl> .
+
+<https://github.com/richsio/autovocoder#preset/glitch_bot>
+    a pset:Preset ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    rdfs:seeAlso <presets.ttl> .
+
+<https://github.com/richsio/autovocoder#preset/cyberbird>
+    a pset:Preset ;
+    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    rdfs:seeAlso <presets.ttl> .

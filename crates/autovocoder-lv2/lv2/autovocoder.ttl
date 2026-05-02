@@ -52,10 +52,18 @@
         lv2:portProperty lv2:enumeration , lv2:integer ;
         lv2:default 0 ;
         lv2:minimum 0 ;
-        lv2:maximum 2 ;
-        lv2:scalePoint [ rdfs:label "Chromatic" ; rdf:value 0 ] ;
-        lv2:scalePoint [ rdfs:label "Major"     ; rdf:value 1 ] ;
-        lv2:scalePoint [ rdfs:label "Minor"     ; rdf:value 2 ]
+        lv2:maximum 10 ;
+        lv2:scalePoint [ rdfs:label "Chromatic"        ; rdf:value 0  ] ;
+        lv2:scalePoint [ rdfs:label "Major"            ; rdf:value 1  ] ;
+        lv2:scalePoint [ rdfs:label "Minor"            ; rdf:value 2  ] ;
+        lv2:scalePoint [ rdfs:label "Dorian"           ; rdf:value 3  ] ;
+        lv2:scalePoint [ rdfs:label "Phrygian"         ; rdf:value 4  ] ;
+        lv2:scalePoint [ rdfs:label "Lydian"           ; rdf:value 5  ] ;
+        lv2:scalePoint [ rdfs:label "Mixolydian"       ; rdf:value 6  ] ;
+        lv2:scalePoint [ rdfs:label "Harmonic Minor"   ; rdf:value 7  ] ;
+        lv2:scalePoint [ rdfs:label "Major Pentatonic" ; rdf:value 8  ] ;
+        lv2:scalePoint [ rdfs:label "Minor Pentatonic" ; rdf:value 9  ] ;
+        lv2:scalePoint [ rdfs:label "Blues"            ; rdf:value 10 ]
     ] , [
         a lv2:ControlPort , lv2:InputPort ;
         lv2:index 5 ;
@@ -174,4 +182,175 @@
         lv2:scalePoint [ rdfs:label "YIN (classic)"   ; rdf:value 0 ] ;
         lv2:scalePoint [ rdfs:label "YIN (FFT)"       ; rdf:value 1 ] ;
         lv2:scalePoint [ rdfs:label "FFT (HPS)"       ; rdf:value 2 ]
+    ] , [
+        a lv2:ControlPort , lv2:InputPort ;
+        lv2:index 15 ;
+        lv2:symbol "carrier_chorus_on" ;
+        lv2:name "Chorus on Carrier" ;
+        lv2:portProperty lv2:toggled , lv2:integer ;
+        lv2:default 0 ;
+        lv2:minimum 0 ;
+        lv2:maximum 1
+    ] , [
+        a lv2:ControlPort , lv2:InputPort ;
+        lv2:index 16 ;
+        lv2:symbol "output_chorus_on" ;
+        lv2:name "Chorus on Output" ;
+        lv2:portProperty lv2:toggled , lv2:integer ;
+        lv2:default 0 ;
+        lv2:minimum 0 ;
+        lv2:maximum 1
+    ] , [
+        a lv2:ControlPort , lv2:InputPort ;
+        lv2:index 17 ;
+        lv2:symbol "chorus_rate" ;
+        lv2:name "Chorus Rate" ;
+        lv2:default 0.7 ;
+        lv2:minimum 0.05 ;
+        lv2:maximum 5.0 ;
+        units:unit units:hz
+    ] , [
+        a lv2:ControlPort , lv2:InputPort ;
+        lv2:index 18 ;
+        lv2:symbol "chorus_depth" ;
+        lv2:name "Chorus Depth" ;
+        lv2:default 0.5 ;
+        lv2:minimum 0.0 ;
+        lv2:maximum 1.0
+    ] , [
+        a lv2:ControlPort , lv2:InputPort ;
+        lv2:index 19 ;
+        lv2:symbol "chorus_mix" ;
+        lv2:name "Chorus Mix" ;
+        lv2:default 0.5 ;
+        lv2:minimum 0.0 ;
+        lv2:maximum 1.0
+    ] , [
+        a lv2:ControlPort , lv2:InputPort ;
+        lv2:index 20 ;
+        lv2:symbol "trem_on" ;
+        lv2:name "Tremolo" ;
+        lv2:portProperty lv2:toggled , lv2:integer ;
+        lv2:default 0 ;
+        lv2:minimum 0 ;
+        lv2:maximum 1
+    ] , [
+        a lv2:ControlPort , lv2:InputPort ;
+        lv2:index 21 ;
+        lv2:symbol "trem_rate" ;
+        lv2:name "Tremolo Rate" ;
+        lv2:default 5.0 ;
+        lv2:minimum 0.1 ;
+        lv2:maximum 20.0 ;
+        units:unit units:hz
+    ] , [
+        a lv2:ControlPort , lv2:InputPort ;
+        lv2:index 22 ;
+        lv2:symbol "trem_depth" ;
+        lv2:name "Tremolo Depth" ;
+        lv2:default 0.7 ;
+        lv2:minimum 0.0 ;
+        lv2:maximum 1.0
+    ] , [
+        a lv2:ControlPort , lv2:InputPort ;
+        lv2:index 23 ;
+        lv2:symbol "trem_shape" ;
+        lv2:name "Tremolo Shape (Sine→Square)" ;
+        lv2:default 0.0 ;
+        lv2:minimum 0.0 ;
+        lv2:maximum 1.0
+    ] , [
+        a lv2:ControlPort , lv2:InputPort ;
+        lv2:index 24 ;
+        lv2:symbol "trem_target" ;
+        lv2:name "Mod LFO Target" ;
+        lv2:portProperty lv2:enumeration , lv2:integer ;
+        lv2:default 0 ;
+        lv2:minimum 0 ;
+        lv2:maximum 3 ;
+        lv2:scalePoint [ rdfs:label "Amplitude (tremolo)" ; rdf:value 0 ] ;
+        lv2:scalePoint [ rdfs:label "Pitch (vibrato)"     ; rdf:value 1 ] ;
+        lv2:scalePoint [ rdfs:label "Dry/Wet"             ; rdf:value 2 ] ;
+        lv2:scalePoint [ rdfs:label "Carrier Level"       ; rdf:value 3 ]
+    ] , [
+        a lv2:ControlPort , lv2:InputPort ;
+        lv2:index 25 ;
+        lv2:symbol "pre_drive_on" ;
+        lv2:name "Drive on Modulator (pre-vocoder)" ;
+        lv2:portProperty lv2:toggled , lv2:integer ;
+        lv2:default 0 ;
+        lv2:minimum 0 ;
+        lv2:maximum 1
+    ] , [
+        a lv2:ControlPort , lv2:InputPort ;
+        lv2:index 26 ;
+        lv2:symbol "post_drive_on" ;
+        lv2:name "Drive on Output (post)" ;
+        lv2:portProperty lv2:toggled , lv2:integer ;
+        lv2:default 0 ;
+        lv2:minimum 0 ;
+        lv2:maximum 1
+    ] , [
+        a lv2:ControlPort , lv2:InputPort ;
+        lv2:index 27 ;
+        lv2:symbol "drive_mode" ;
+        lv2:name "Drive Mode" ;
+        lv2:portProperty lv2:enumeration , lv2:integer ;
+        lv2:default 1 ;
+        lv2:minimum 0 ;
+        lv2:maximum 2 ;
+        lv2:scalePoint [ rdfs:label "Tube" ; rdf:value 0 ] ;
+        lv2:scalePoint [ rdfs:label "Tape" ; rdf:value 1 ] ;
+        lv2:scalePoint [ rdfs:label "Fuzz" ; rdf:value 2 ]
+    ] , [
+        a lv2:ControlPort , lv2:InputPort ;
+        lv2:index 28 ;
+        lv2:symbol "drive_amount" ;
+        lv2:name "Drive Amount" ;
+        lv2:default 0.5 ;
+        lv2:minimum 0.0 ;
+        lv2:maximum 1.0
+    ] , [
+        a lv2:ControlPort , lv2:InputPort ;
+        lv2:index 29 ;
+        lv2:symbol "crusher_on" ;
+        lv2:name "Bit Crusher" ;
+        lv2:portProperty lv2:toggled , lv2:integer ;
+        lv2:default 0 ;
+        lv2:minimum 0 ;
+        lv2:maximum 1
+    ] , [
+        a lv2:ControlPort , lv2:InputPort ;
+        lv2:index 30 ;
+        lv2:symbol "crusher_bits" ;
+        lv2:name "Crusher Bit Depth" ;
+        lv2:portProperty lv2:integer ;
+        lv2:default 16 ;
+        lv2:minimum 1 ;
+        lv2:maximum 16
+    ] , [
+        a lv2:ControlPort , lv2:InputPort ;
+        lv2:index 31 ;
+        lv2:symbol "crusher_rate" ;
+        lv2:name "Crusher Rate" ;
+        lv2:default 1.0 ;
+        lv2:minimum 0.0 ;
+        lv2:maximum 1.0
+    ] , [
+        a lv2:ControlPort , lv2:InputPort ;
+        lv2:index 32 ;
+        lv2:symbol "sub_on" ;
+        lv2:name "Sub Oscillator" ;
+        lv2:portProperty lv2:toggled , lv2:integer ;
+        lv2:default 0 ;
+        lv2:minimum 0 ;
+        lv2:maximum 1
+    ] , [
+        a lv2:ControlPort , lv2:InputPort ;
+        lv2:index 33 ;
+        lv2:symbol "sub_level" ;
+        lv2:name "Sub Level" ;
+        lv2:default 0.5 ;
+        lv2:minimum 0.0 ;
+        lv2:maximum 1.0
     ] .
