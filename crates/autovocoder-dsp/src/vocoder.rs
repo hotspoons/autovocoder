@@ -82,6 +82,38 @@ impl Vocoder {
         }
         out * self.output_gain
     }
+
+    /// Block-based variant. Processes one band at a time across the whole
+    /// block, summing into `out`. Each band's biquad/env state stays hot in
+    /// registers for the entire inner loop, which is markedly more
+    /// autovectorization-friendly than the per-sample loop. Intended for the
+    /// LV2 / standalone hosts where `run()` already gets a buffer.
+    ///
+    /// Caller-owned: `modulator.len() == carrier.len() == out.len()`.
+    pub fn process_block(&mut self, modulator: &[f32], carrier: &[f32], out: &mut [f32]) {
+        let n = modulator.len();
+        debug_assert_eq!(carrier.len(), n);
+        debug_assert_eq!(out.len(), n);
+        out.fill(0.0);
+        for b in &mut self.bands {
+            // Pull state into locals so the optimizer is free to keep them
+            // in registers for the whole loop instead of round-tripping
+            // through `&mut self`.
+            let analysis = &mut b.analysis;
+            let synthesis = &mut b.synthesis;
+            let env = &mut b.env;
+            for i in 0..n {
+                let mod_band = analysis.process(modulator[i]);
+                let e = env.process(mod_band);
+                let car_band = synthesis.process(carrier[i]);
+                out[i] += car_band * e;
+            }
+        }
+        let g = self.output_gain;
+        for s in out.iter_mut() {
+            *s *= g;
+        }
+    }
 }
 
 /// Log-spaced center frequency for band `i` of `n` in [f_low, f_high].

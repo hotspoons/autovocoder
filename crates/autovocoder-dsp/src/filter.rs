@@ -43,6 +43,7 @@ impl Biquad {
         }
     }
 
+    #[inline(always)]
     pub fn process(&mut self, x: f32) -> f32 {
         let y = self.b0 * x + self.z1;
         self.z1 = self.b1 * x - self.a1 * y + self.z2;
@@ -64,6 +65,7 @@ impl BandPass4 {
         Self { a: bq, b: bq }
     }
 
+    #[inline(always)]
     pub fn process(&mut self, x: f32) -> f32 {
         self.b.process(self.a.process(x))
     }
@@ -92,6 +94,7 @@ impl EnvFollower {
         }
     }
 
+    #[inline(always)]
     pub fn process(&mut self, x: f32) -> f32 {
         let rect = x.abs();
         let coeff = if rect > self.env {

@@ -20,7 +20,13 @@ hound = "3.5"
 clap = { version = "4", features = ["derive"] }
 anyhow = "1"
 wasm-bindgen = "0.2"
+rustfft = "6"
 
 [profile.release]
-lto = "thin"
+# Fat LTO is worth the longer link time for the LV2 cdylib — biquad / env
+# follower / autovocoder hot-path lives across crate boundaries and only
+# fully inlines under fat LTO. Cloud Run cold starts are dominated by
+# container pull, not link time, so the build cost is essentially free in
+# the deploy loop.
+lto = "fat"
 codegen-units = 1

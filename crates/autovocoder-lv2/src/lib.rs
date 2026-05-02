@@ -19,11 +19,12 @@
 //!  11  CompOn        (int 0/1; enable the built-in compressor)
 //!  12  CompThreshold (float -40..0 dB; compressor threshold)
 //!  13  ChordType     (int 0..14; voicing for Chord / FixedChord modes)
+//!  14  PitchAlgo     (int 0=YinClassic, 1=YinFft, 2=FftPeak)
 
 #![allow(non_camel_case_types)]
 #![allow(clippy::missing_safety_doc)]
 
-use autovocoder_dsp::{AutoVocoder, AutoVocoderConfig, CarrierMode, ChordVoicing, Scale};
+use autovocoder_dsp::{AutoVocoder, AutoVocoderConfig, CarrierMode, ChordVoicing, PitchAlgorithm, Scale};
 use std::ffi::{c_char, c_void, CStr};
 use std::ptr;
 
@@ -76,6 +77,7 @@ const PORT_OUTPUT_GAIN: u32 = 10;
 const PORT_COMP_ON: u32 = 11;
 const PORT_COMP_THRESHOLD: u32 = 12;
 const PORT_CHORD_TYPE: u32 = 13;
+const PORT_PITCH_ALGO: u32 = 14;
 
 struct Plugin {
     av: AutoVocoder,
@@ -97,6 +99,7 @@ struct Plugin {
     comp_on: *const f32,
     comp_threshold: *const f32,
     chord_type: *const f32,
+    pitch_algo: *const f32,
 
     // Last-seen values, so we only push into DSP on change (cheap RT-safe).
     last_mode: i32,
@@ -111,6 +114,7 @@ struct Plugin {
     last_comp_on: i32,
     last_comp_threshold: f32,
     last_chord_type: i32,
+    last_pitch_algo: i32,
 }
 
 unsafe extern "C" fn instantiate(
@@ -137,6 +141,7 @@ unsafe extern "C" fn instantiate(
         comp_on: ptr::null(),
         comp_threshold: ptr::null(),
         chord_type: ptr::null(),
+        pitch_algo: ptr::null(),
         last_mode: -1,
         last_fixed_note: -1,
         last_scale_kind: -1,
@@ -149,6 +154,7 @@ unsafe extern "C" fn instantiate(
         last_comp_on: -1,
         last_comp_threshold: f32::NAN,
         last_chord_type: -1,
+        last_pitch_algo: -1,
     });
     Box::into_raw(p) as LV2_Handle
 }
@@ -170,6 +176,7 @@ unsafe extern "C" fn connect_port(instance: LV2_Handle, port: u32, data: *mut c_
         PORT_COMP_ON => p.comp_on = data as *const f32,
         PORT_COMP_THRESHOLD => p.comp_threshold = data as *const f32,
         PORT_CHORD_TYPE => p.chord_type = data as *const f32,
+        PORT_PITCH_ALGO => p.pitch_algo = data as *const f32,
         _ => {}
     }
 }
@@ -191,9 +198,7 @@ unsafe extern "C" fn run(instance: LV2_Handle, n_samples: u32) {
     let n = n_samples as usize;
     let input = std::slice::from_raw_parts(p.in_buf, n);
     let output = std::slice::from_raw_parts_mut(p.out_buf, n);
-    for i in 0..n {
-        output[i] = p.av.process_sample(input[i]);
-    }
+    p.av.process_block(input, output);
 }
 
 unsafe fn apply_controls(p: &mut Plugin) {
@@ -271,6 +276,11 @@ unsafe fn apply_controls(p: &mut Plugin) {
             p.av.set_compressor_threshold_db(t);
             p.last_comp_threshold = t;
         }
+    }
+    let algo_i = read_int(p.pitch_algo, p.last_pitch_algo.max(0));
+    if algo_i != p.last_pitch_algo {
+        p.av.set_pitch_algorithm(PitchAlgorithm::from_int(algo_i));
+        p.last_pitch_algo = algo_i;
     }
 }
 

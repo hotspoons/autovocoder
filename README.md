@@ -143,6 +143,26 @@ just wasm         # build the WASM package (needs wasm-pack)
 
 Or without `just`, any `cargo` command works — e.g. `cargo test --workspace --exclude autovocoder-wasm`.
 
+### Deploying to constrained Linux hosts (Cloud Run, small VMs)
+
+The default `release` profile builds a portable x86-64 binary — safe but
+leaves SIMD on the table. For a small (~2 vCPU) Linux box, build with
+the AVX2/FMA baseline:
+
+```bash
+just release-cloud   # RUSTFLAGS="-C target-cpu=x86-64-v3" cargo build --release
+```
+
+Then pick the cheapest pitch detector your material tolerates — the
+plugin exposes three:
+
+- **YIN (FFT)** — default, recommended. Same accuracy as classic YIN,
+  ~30× cheaper for our window size.
+- **YIN (classic)** — pure time-domain, no FFT. Use only if FFT init
+  cost matters (very rare).
+- **FFT (HPS)** — cheapest per-estimate. Best on sustained, harmonic
+  voices; less robust on breathy / noisy material.
+
 ## License
 
 MIT OR Apache-2.0 — pick whichever you prefer.

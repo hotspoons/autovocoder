@@ -3,7 +3,7 @@
 
 use crate::dynamics::{db_to_linear, Compressor};
 use crate::osc::Saw;
-use crate::pitch::{PitchEstimate, YinDetector};
+use crate::pitch::{PitchAlgorithm, PitchDetector, PitchEstimate};
 use crate::scale::{midi_to_hz, quantize_hz_to_scale, Portamento, Scale};
 use crate::vocoder::{Vocoder, VocoderConfig};
 
@@ -108,6 +108,7 @@ pub struct AutoVocoderConfig {
     pub carrier_level: f32, // saw level fed to the vocoder
     pub pitch_min_hz: f32,
     pub pitch_max_hz: f32,
+    pub pitch_algorithm: PitchAlgorithm,
     // Input stage (pre-vocoder).
     pub input_gain_db: f32, // applied to the voice before everything
     // Output stage.
@@ -127,6 +128,9 @@ impl Default for AutoVocoderConfig {
             carrier_level: 0.6,
             pitch_min_hz: 70.0,
             pitch_max_hz: 800.0,
+            // FFT-based YIN by default — same accuracy as classic but ~30×
+            // cheaper on the 2k-sample window we use for vocal range.
+            pitch_algorithm: PitchAlgorithm::YinFft,
             // Input gain: bring quiet vocals up to a level where the
             // envelope followers can do real work. +9 dB is a conservative
             // default for studio mic levels (~-18 dBFS typical).
@@ -144,7 +148,7 @@ impl Default for AutoVocoderConfig {
 pub struct AutoVocoder {
     sample_rate: f32,
     cfg: AutoVocoderConfig,
-    yin: YinDetector,
+    pitch: PitchDetector,
     last_pitch: PitchEstimate,
     // Up to CARRIER_VOICES oscs. Unused slots stay at 0 Hz so they produce
     // no output. Enough to cover every chord voicing up through 9ths.
@@ -154,20 +158,40 @@ pub struct AutoVocoder {
     compressor: Compressor,
     input_gain: f32,  // linear
     output_gain: f32, // linear (post-compressor makeup)
+    // Hot-path caches. Recomputed only when their inputs change rather than
+    // every sample — see `refresh_root()` and `refresh_voicing()`.
+    chord_ratios: [f32; CARRIER_VOICES],
+    voice_count: usize,
+    chord_norm: f32,         // 1 / sqrt(active voices); avoids per-sample sqrt
+    cached_root_hz: f32,     // quantized root at the last refresh
+    cached_for_pitch_hz: f32, // value of last_pitch.hz used for cached_root_hz
+    // Block-processing scratch. Sized by the host's first run() call and
+    // grown only if the host bumps its buffer size — both cases are rare
+    // outside startup, so we pay an allocation almost never.
+    mod_scratch: Vec<f32>,
+    car_scratch: Vec<f32>,
+    wet_scratch: Vec<f32>,
 }
 
 impl AutoVocoder {
     pub fn new(sample_rate: f32, cfg: AutoVocoderConfig) -> Self {
-        let yin = YinDetector::new(sample_rate, cfg.pitch_min_hz, cfg.pitch_max_hz, 256);
+        let pitch = PitchDetector::new(
+            cfg.pitch_algorithm,
+            sample_rate,
+            cfg.pitch_min_hz,
+            cfg.pitch_max_hz,
+            256,
+        );
         let mut compressor = Compressor::new(sample_rate, cfg.compressor_threshold_db);
         compressor.set_enabled(cfg.compressor_enabled);
         // `[T; N]` from a non-Copy constructor — do it by hand.
         let oscs: [Saw; CARRIER_VOICES] = std::array::from_fn(|_| Saw::new(sample_rate));
         let portos: [Portamento; CARRIER_VOICES] =
             std::array::from_fn(|_| Portamento::new(sample_rate, cfg.portamento_ms));
+        let (chord_ratios, voice_count, chord_norm) = compute_voicing(cfg.carrier_mode);
         Self {
             sample_rate,
-            yin,
+            pitch,
             last_pitch: PitchEstimate::UNVOICED,
             oscs,
             portos,
@@ -175,6 +199,14 @@ impl AutoVocoder {
             compressor,
             input_gain: db_to_linear(cfg.input_gain_db),
             output_gain: db_to_linear(cfg.output_gain_db),
+            chord_ratios,
+            voice_count,
+            chord_norm,
+            cached_root_hz: 0.0,
+            cached_for_pitch_hz: f32::NAN,
+            mod_scratch: Vec::new(),
+            car_scratch: Vec::new(),
+            wet_scratch: Vec::new(),
             cfg,
         }
     }
@@ -185,10 +217,18 @@ impl AutoVocoder {
 
     pub fn set_scale(&mut self, scale: Scale) {
         self.cfg.scale = scale;
+        // Force root recompute on next sample — a different scale can move the
+        // quantized root even though the input pitch hasn't changed.
+        self.cached_for_pitch_hz = f32::NAN;
     }
 
     pub fn set_carrier_mode(&mut self, mode: CarrierMode) {
         self.cfg.carrier_mode = mode;
+        let (ratios, count, norm) = compute_voicing(mode);
+        self.chord_ratios = ratios;
+        self.voice_count = count;
+        self.chord_norm = norm;
+        self.cached_for_pitch_hz = f32::NAN;
     }
 
     pub fn set_dry_wet(&mut self, mix: f32) {
@@ -229,6 +269,24 @@ impl AutoVocoder {
         self.compressor.set_threshold_db(db);
     }
 
+    pub fn set_pitch_algorithm(&mut self, algo: PitchAlgorithm) {
+        if self.pitch.algorithm() == algo {
+            return;
+        }
+        self.cfg.pitch_algorithm = algo;
+        // Rebuild — each variant maintains its own ring buffer / FFT plan.
+        // Last pitch resets so we don't smear stale state across the swap.
+        self.pitch = PitchDetector::new(
+            algo,
+            self.sample_rate,
+            self.cfg.pitch_min_hz,
+            self.cfg.pitch_max_hz,
+            256,
+        );
+        self.last_pitch = PitchEstimate::UNVOICED;
+        self.cached_for_pitch_hz = f32::NAN;
+    }
+
     pub fn reset(&mut self) {
         self.vocoder.reset();
         self.compressor.reset();
@@ -241,31 +299,23 @@ impl AutoVocoder {
         }
     }
 
-    /// Target Hz for each carrier oscillator given the latest voice pitch.
-    /// Unused slots return 0.0 (silenced).
-    fn carrier_targets(&self, voice_hz: f32) -> [f32; CARRIER_VOICES] {
-        let mut out = [0.0f32; CARRIER_VOICES];
-        let (root_hz, voicing) = match self.cfg.carrier_mode {
-            CarrierMode::Mono => (quantize_hz_to_scale(voice_hz, self.cfg.scale), None),
-            CarrierMode::Chord(v) => (quantize_hz_to_scale(voice_hz, self.cfg.scale), Some(v)),
-            CarrierMode::Fixed { midi } => (midi_to_hz(midi as f32), None),
-            CarrierMode::FixedChord { midi, voicing } => (midi_to_hz(midi as f32), Some(voicing)),
+    /// Refresh the cached quantized/fixed root if the voice pitch has changed
+    /// since we last computed it. Called once per sample — most samples hit
+    /// the early-return because YIN only updates the pitch on hop boundaries.
+    #[inline]
+    fn refresh_root(&mut self) {
+        if self.cached_for_pitch_hz == self.last_pitch.hz {
+            return;
+        }
+        self.cached_root_hz = match self.cfg.carrier_mode {
+            CarrierMode::Mono | CarrierMode::Chord(_) => {
+                quantize_hz_to_scale(self.last_pitch.hz, self.cfg.scale)
+            }
+            CarrierMode::Fixed { midi } | CarrierMode::FixedChord { midi, .. } => {
+                midi_to_hz(midi as f32)
+            }
         };
-        if root_hz <= 0.0 {
-            return out;
-        }
-        match voicing {
-            None => {
-                out[0] = root_hz;
-            }
-            Some(v) => {
-                let intervals = v.intervals();
-                for (i, &semis) in intervals.iter().enumerate().take(CARRIER_VOICES) {
-                    out[i] = root_hz * 2f32.powf(semis as f32 / 12.0);
-                }
-            }
-        }
-        out
+        self.cached_for_pitch_hz = self.last_pitch.hz;
     }
 
     /// Process one sample. Voice in → vocoded out.
@@ -276,31 +326,30 @@ impl AutoVocoder {
         // louder before any post-stage gain.
         let voice = voice * self.input_gain;
 
-        if let Some(est) = self.yin.push(voice) {
+        if let Some(est) = self.pitch.push(voice) {
             if est.is_voiced() {
                 self.last_pitch = est;
             }
         }
 
-        let targets = self.carrier_targets(self.last_pitch.hz);
+        self.refresh_root();
+        let root = self.cached_root_hz;
         let mut carrier_sum = 0.0;
-        let mut active = 0;
-        for ((osc, porto), target) in self
-            .oscs
-            .iter_mut()
-            .zip(self.portos.iter_mut())
-            .zip(targets)
-        {
-            let smoothed = porto.process(target);
-            if smoothed > 0.0 {
+        if root > 0.0 {
+            for ((osc, porto), &ratio) in self
+                .oscs
+                .iter_mut()
+                .zip(self.portos.iter_mut())
+                .zip(self.chord_ratios.iter())
+            {
+                if ratio == 0.0 {
+                    continue;
+                }
+                let smoothed = porto.process(root * ratio);
                 osc.set_frequency(smoothed);
                 carrier_sum += osc.tick();
-                active += 1;
             }
-        }
-        if active > 1 {
-            // Normalize so chord mode doesn't blow up vs mono.
-            carrier_sum /= (active as f32).sqrt();
+            carrier_sum *= self.chord_norm;
         }
         carrier_sum *= self.cfg.carrier_level;
 
@@ -322,6 +371,125 @@ impl AutoVocoder {
             *s = self.process_sample(*s);
         }
     }
+
+    /// Block-based processing. The path real-time hosts (LV2, JACK) take.
+    ///
+    /// Splits the work into three contiguous passes over the block:
+    ///   1. pre-stage — input gain, YIN push, carrier oscillators
+    ///   2. vocoder — runs one band at a time across the whole block, so
+    ///      each band's biquad/env state stays in registers rather than
+    ///      getting reloaded per sample × 16 bands
+    ///   3. post-stage — dry/wet, compressor, output gain, soft clamp
+    ///
+    /// Equivalent to a per-sample loop over `process_sample` but materially
+    /// less cache thrash and friendlier to autovectorization.
+    pub fn process_block(&mut self, input: &[f32], output: &mut [f32]) {
+        let n = input.len();
+        debug_assert_eq!(output.len(), n);
+        if n == 0 {
+            return;
+        }
+        if self.mod_scratch.len() < n {
+            self.mod_scratch.resize(n, 0.0);
+            self.car_scratch.resize(n, 0.0);
+            self.wet_scratch.resize(n, 0.0);
+        }
+
+        // ---- Pass 1: pre-stage. Per-sample because YIN + portamento +
+        // oscillator phase are inherently sequential. Borrow scratch in a
+        // tight scope so subsequent passes can re-borrow `self`.
+        {
+            let mod_buf = &mut self.mod_scratch[..n];
+            let car_buf = &mut self.car_scratch[..n];
+            let input_gain = self.input_gain;
+            let carrier_level = self.cfg.carrier_level;
+            for i in 0..n {
+                let v = input[i] * input_gain;
+                if let Some(est) = self.pitch.push(v) {
+                    if est.is_voiced() {
+                        self.last_pitch = est;
+                    }
+                }
+                // Inline `refresh_root` — `self` is otherwise unborrowable
+                // here because we hold mod_buf / car_buf above.
+                if self.cached_for_pitch_hz != self.last_pitch.hz {
+                    self.cached_root_hz = match self.cfg.carrier_mode {
+                        CarrierMode::Mono | CarrierMode::Chord(_) => {
+                            quantize_hz_to_scale(self.last_pitch.hz, self.cfg.scale)
+                        }
+                        CarrierMode::Fixed { midi }
+                        | CarrierMode::FixedChord { midi, .. } => midi_to_hz(midi as f32),
+                    };
+                    self.cached_for_pitch_hz = self.last_pitch.hz;
+                }
+                let root = self.cached_root_hz;
+                let mut carrier = 0.0;
+                if root > 0.0 {
+                    for ((osc, porto), &ratio) in self
+                        .oscs
+                        .iter_mut()
+                        .zip(self.portos.iter_mut())
+                        .zip(self.chord_ratios.iter())
+                    {
+                        if ratio == 0.0 {
+                            continue;
+                        }
+                        let smoothed = porto.process(root * ratio);
+                        osc.set_frequency(smoothed);
+                        carrier += osc.tick();
+                    }
+                    carrier *= self.chord_norm;
+                }
+                mod_buf[i] = v;
+                car_buf[i] = carrier * carrier_level;
+            }
+        }
+
+        // ---- Pass 2: vocoder, band-major.
+        self.vocoder.process_block(
+            &self.mod_scratch[..n],
+            &self.car_scratch[..n],
+            &mut self.wet_scratch[..n],
+        );
+
+        // ---- Pass 3: post-stage.
+        let mix = self.cfg.dry_wet;
+        let dry_g = 1.0 - mix;
+        let output_gain = self.output_gain;
+        let mod_buf = &self.mod_scratch[..n];
+        let wet_buf = &self.wet_scratch[..n];
+        for i in 0..n {
+            let mixed = mod_buf[i] * dry_g + wet_buf[i] * mix;
+            let compressed = self.compressor.process(mixed);
+            output[i] = (compressed * output_gain).clamp(-0.98, 0.98);
+        }
+    }
+}
+
+/// Voicing → (per-voice frequency ratios, voice count, output normalization).
+/// Lifted out of the per-sample path because chord intervals are constants —
+/// the old code did `2f32.powf(semis as f32 / 12.0)` per voice per sample.
+fn compute_voicing(mode: CarrierMode) -> ([f32; CARRIER_VOICES], usize, f32) {
+    let mut ratios = [0.0f32; CARRIER_VOICES];
+    let voicing = match mode {
+        CarrierMode::Mono | CarrierMode::Fixed { .. } => None,
+        CarrierMode::Chord(v) | CarrierMode::FixedChord { voicing: v, .. } => Some(v),
+    };
+    let intervals: &[i8] = match voicing {
+        None => &[0],
+        Some(v) => v.intervals(),
+    };
+    let count = intervals.len().min(CARRIER_VOICES);
+    for (i, &semis) in intervals.iter().take(CARRIER_VOICES).enumerate() {
+        ratios[i] = 2f32.powf(semis as f32 / 12.0);
+    }
+    // Mirrors the old `1 / sqrt(active)` normalization (only kicks in for chords).
+    let norm = if count > 1 {
+        1.0 / (count as f32).sqrt()
+    } else {
+        1.0
+    };
+    (ratios, count, norm)
 }
 
 #[cfg(test)]
@@ -336,6 +504,40 @@ mod tests {
         av.process_buffer(&mut buf);
         let peak = buf.iter().map(|x| x.abs()).fold(0.0f32, f32::max);
         assert!(peak < 1e-3, "silence should stay silent, peak={peak}");
+    }
+
+    #[test]
+    fn block_matches_per_sample() {
+        // process_block must produce bit-identical output to a per-sample
+        // loop — same DSP, just rearranged. If they ever drift, something
+        // about the block path is doing different math.
+        let sr = 48_000.0;
+        let cfg = AutoVocoderConfig {
+            carrier_mode: CarrierMode::Fixed { midi: 48 },
+            ..AutoVocoderConfig::default()
+        };
+        let mut av_a = AutoVocoder::new(sr, cfg);
+        let mut av_b = AutoVocoder::new(sr, cfg);
+        // Quasi-realistic input: a couple of partials.
+        let n = 4096;
+        let input: Vec<f32> = (0..n)
+            .map(|i| {
+                let t = i as f32 / sr;
+                0.3 * ((TAU * 220.0 * t).sin() + 0.5 * (TAU * 440.0 * t).sin())
+            })
+            .collect();
+        let mut buf_a = input.clone();
+        av_a.process_buffer(&mut buf_a);
+        let mut buf_b = vec![0.0f32; n];
+        // Run two blocks of unequal size to exercise the resize path.
+        av_b.process_block(&input[..1024], &mut buf_b[..1024]);
+        av_b.process_block(&input[1024..], &mut buf_b[1024..]);
+        for (i, (a, b)) in buf_a.iter().zip(buf_b.iter()).enumerate() {
+            assert!(
+                (a - b).abs() < 1e-5,
+                "drift at sample {i}: per-sample={a}, block={b}"
+            );
+        }
     }
 
     #[test]

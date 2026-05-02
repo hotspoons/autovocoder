@@ -9,6 +9,13 @@ build:
 release:
     cargo build --workspace --release
 
+# Tuned release build for x86_64 deploy targets (Cloud Run, most cloud
+# Linux). Enables AVX2/FMA via the x86-64-v3 baseline — safe on any
+# Intel ≥ Haswell or AMD ≥ Excavator (i.e. anything Cloud Run runs on).
+# Notably faster on the per-band vocoder loop and the FFT pitch detectors.
+release-cloud:
+    RUSTFLAGS="-C target-cpu=x86-64-v3" cargo build --workspace --release
+
 # Run the standalone offline renderer
 render *ARGS:
     cargo run --release -p autovocoder-standalone -- render {{ARGS}}

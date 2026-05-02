@@ -12,24 +12,32 @@ use crate::filter::EnvFollower;
 pub struct Compressor {
     env: EnvFollower,
     threshold_db: f32,
-    ratio: f32, // compression ratio (e.g. 4.0 => 4:1)
+    threshold_lin: f32, // 10^(threshold_db/20); cached for the hot-path early-out
+    /// `1 - 1/ratio` — the slope of the gain-reduction curve in dB/dB. With
+    /// the linear-domain reformulation, this is the exponent we raise the
+    /// linear over-threshold ratio to.
+    slope: f32,
     enabled: bool,
 }
 
 impl Compressor {
     pub fn new(sample_rate: f32, threshold_db: f32) -> Self {
+        let ratio = 4.0_f32;
         Self {
             // Attack/release tuned for vocoder output: let fast transients
             // through a hair, catch the body of sustained notes.
             env: EnvFollower::new(sample_rate, 5.0, 80.0),
             threshold_db,
-            ratio: 4.0,
+            threshold_lin: db_to_linear(threshold_db),
+            slope: 1.0 - 1.0 / ratio,
             enabled: true,
         }
     }
 
     pub fn set_threshold_db(&mut self, db: f32) {
-        self.threshold_db = db.clamp(-60.0, 0.0);
+        let clamped = db.clamp(-60.0, 0.0);
+        self.threshold_db = clamped;
+        self.threshold_lin = db_to_linear(clamped);
     }
 
     pub fn set_enabled(&mut self, on: bool) {
@@ -42,24 +50,23 @@ impl Compressor {
 
     /// One-sample feedforward compression. Returns the gain-reduced sample
     /// (no makeup — caller applies output_gain afterwards).
+    ///
+    /// The whole curve is evaluated in linear amplitude. In dB:
+    ///   reduction_db = -slope * (env_db - threshold_db)
+    ///   gain         = 10^(reduction_db / 20)
+    /// Substituting `env_db - threshold_db = 20 * log10(env / thr)`:
+    ///   gain         = (env / thr)^(-slope) = (thr / env)^slope
+    /// One `powf` per active sample, no logs. Below threshold we early-out
+    /// with a single compare, which is the common case for typical material.
     pub fn process(&mut self, x: f32) -> f32 {
         if !self.enabled {
             return x;
         }
         let env = self.env.process(x);
-        // Below -120 dB → effectively silence; skip the log.
-        if env < 1e-6 {
+        if env <= self.threshold_lin {
             return x;
         }
-        let env_db = 20.0 * env.log10();
-        let over = env_db - self.threshold_db;
-        if over <= 0.0 {
-            return x;
-        }
-        // Linear-knee (hard-ish) compression. `(1 - 1/ratio)` is the amount
-        // of each dB over threshold that gets squashed.
-        let reduction_db = -over * (1.0 - 1.0 / self.ratio);
-        let gain = 10f32.powf(reduction_db / 20.0);
+        let gain = (self.threshold_lin / env).powf(self.slope);
         x * gain
     }
 }
