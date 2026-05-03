@@ -17,11 +17,11 @@
 # inherit whatever was set previously for the new effects, which is fine
 # in practice but documented here so it isn't a surprise.
 
-<https://github.com/richsio/autovocoder#preset/soundwave_c2>
+<https://github.com/hotspoons/autovocoder#preset/soundwave_c2>
     a pset:Preset ;
     rdfs:label "Soundwave (C2 / deep)" ;
     rdfs:comment "Authentic G1 Soundwave: fixed-root minor triad at C2. Scott Brownlee mixed Frank Welker's flat monotone delivery with chord-based vocoder carrier — this is that." ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
         [ lv2:symbol "mode"           ; pset:value 3    ] ,
         [ lv2:symbol "fixed_note"     ; pset:value 36   ] ,
@@ -36,11 +36,11 @@
         [ lv2:symbol "comp_threshold" ; pset:value -18.0 ] ,
         [ lv2:symbol "chord_type"     ; pset:value 2    ] .
 
-<https://github.com/richsio/autovocoder#preset/soundwave_c3>
+<https://github.com/hotspoons/autovocoder#preset/soundwave_c3>
     a pset:Preset ;
     rdfs:label "Soundwave (C3 / neutral)" ;
     rdfs:comment "Same Soundwave chord stack an octave up — more intelligible, less menacing." ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
         [ lv2:symbol "mode"           ; pset:value 3    ] ,
         [ lv2:symbol "fixed_note"     ; pset:value 48   ] ,
@@ -55,11 +55,11 @@
         [ lv2:symbol "comp_threshold" ; pset:value -18.0 ] ,
         [ lv2:symbol "chord_type"     ; pset:value 2    ] .
 
-<https://github.com/richsio/autovocoder#preset/intergalactic>
+<https://github.com/hotspoons/autovocoder#preset/intergalactic>
     a pset:Preset ;
     rdfs:label "Intergalactic" ;
     rdfs:comment "Beastie Boys vocoder-refrain vibe: fixed A2, snappy glide, bright carrier, hot output." ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
         [ lv2:symbol "mode"           ; pset:value 2    ] ,
         [ lv2:symbol "fixed_note"     ; pset:value 45   ] ,
@@ -74,11 +74,11 @@
         [ lv2:symbol "comp_threshold" ; pset:value -20.0 ] ,
         [ lv2:symbol "chord_type"     ; pset:value 1    ] .
 
-<https://github.com/richsio/autovocoder#preset/chromatic_robot>
+<https://github.com/hotspoons/autovocoder#preset/chromatic_robot>
     a pset:Preset ;
     rdfs:label "Chromatic Robot" ;
     rdfs:comment "Tracks the singer's pitch on a chromatic grid. Snappy portamento for a mechanical feel." ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
         [ lv2:symbol "mode"           ; pset:value 0    ] ,
         [ lv2:symbol "fixed_note"     ; pset:value 48   ] ,
@@ -93,11 +93,11 @@
         [ lv2:symbol "comp_threshold" ; pset:value -18.0 ] ,
         [ lv2:symbol "chord_type"     ; pset:value 1    ] .
 
-<https://github.com/richsio/autovocoder#preset/in_key_c_major>
+<https://github.com/hotspoons/autovocoder#preset/in_key_c_major>
     a pset:Preset ;
     rdfs:label "In Key — C Major" ;
     rdfs:comment "Follows pitch but snaps to C major. Sing wrong, sound right." ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
         [ lv2:symbol "mode"           ; pset:value 0    ] ,
         [ lv2:symbol "fixed_note"     ; pset:value 48   ] ,
@@ -112,11 +112,11 @@
         [ lv2:symbol "comp_threshold" ; pset:value -18.0 ] ,
         [ lv2:symbol "chord_type"     ; pset:value 1    ] .
 
-<https://github.com/richsio/autovocoder#preset/in_key_a_minor>
+<https://github.com/hotspoons/autovocoder#preset/in_key_a_minor>
     a pset:Preset ;
     rdfs:label "In Key — A Minor" ;
     rdfs:comment "Melodic, natural-minor vocoder line. Good backing-vocal preset." ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
         [ lv2:symbol "mode"           ; pset:value 0    ] ,
         [ lv2:symbol "fixed_note"     ; pset:value 48   ] ,
@@ -131,11 +131,11 @@
         [ lv2:symbol "comp_threshold" ; pset:value -18.0 ] ,
         [ lv2:symbol "chord_type"     ; pset:value 1    ] .
 
-<https://github.com/richsio/autovocoder#preset/dark_choir_am>
+<https://github.com/hotspoons/autovocoder#preset/dark_choir_am>
     a pset:Preset ;
     rdfs:label "Dark Choir (tracks, A Minor)" ;
     rdfs:comment "Each detected note sprouts a minor triad. Spreads a single voice into an eerie pad." ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
         [ lv2:symbol "mode"           ; pset:value 1    ] ,
         [ lv2:symbol "fixed_note"     ; pset:value 48   ] ,
@@ -150,11 +150,11 @@
         [ lv2:symbol "comp_threshold" ; pset:value -18.0 ] ,
         [ lv2:symbol "chord_type"     ; pset:value 2    ] .
 
-<https://github.com/richsio/autovocoder#preset/bright_angels_c>
+<https://github.com/hotspoons/autovocoder#preset/bright_angels_c>
     a pset:Preset ;
     rdfs:label "Bright Angels (tracks, Major)" ;
     rdfs:comment "Major triad per detected note, snapped to C major. Heavenly Auto-Tune-on-steroids vibe." ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
         [ lv2:symbol "mode"           ; pset:value 1    ] ,
         [ lv2:symbol "fixed_note"     ; pset:value 48   ] ,
@@ -169,11 +169,11 @@
         [ lv2:symbol "comp_threshold" ; pset:value -18.0 ] ,
         [ lv2:symbol "chord_type"     ; pset:value 1    ] .
 
-<https://github.com/richsio/autovocoder#preset/jazz_cafe_maj7>
+<https://github.com/hotspoons/autovocoder#preset/jazz_cafe_maj7>
     a pset:Preset ;
     rdfs:label "Jazz Cafe (tracks, Maj7)" ;
     rdfs:comment "Major-7th voicing on every note. Smooth, late-night, a little unresolved." ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
         [ lv2:symbol "mode"           ; pset:value 1    ] ,
         [ lv2:symbol "fixed_note"     ; pset:value 48   ] ,
@@ -188,11 +188,11 @@
         [ lv2:symbol "comp_threshold" ; pset:value -18.0 ] ,
         [ lv2:symbol "chord_type"     ; pset:value 7    ] .
 
-<https://github.com/richsio/autovocoder#preset/ominous_dim7>
+<https://github.com/hotspoons/autovocoder#preset/ominous_dim7>
     a pset:Preset ;
     rdfs:label "Ominous (FixedChord, Dim7)" ;
     rdfs:comment "Fixed diminished-7th at E2. Horror-film menace — sit below a whispered vocal." ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
         [ lv2:symbol "mode"           ; pset:value 3    ] ,
         [ lv2:symbol "fixed_note"     ; pset:value 40   ] ,
@@ -207,11 +207,11 @@
         [ lv2:symbol "comp_threshold" ; pset:value -18.0 ] ,
         [ lv2:symbol "chord_type"     ; pset:value 10   ] .
 
-<https://github.com/richsio/autovocoder#preset/power_chord_robot>
+<https://github.com/hotspoons/autovocoder#preset/power_chord_robot>
     a pset:Preset ;
     rdfs:label "Power Chord Robot (FixedChord, 5th)" ;
     rdfs:comment "Fixed power chord at A1. Rock-metal robot; no third means it fits over any tonality." ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
         [ lv2:symbol "mode"           ; pset:value 3    ] ,
         [ lv2:symbol "fixed_note"     ; pset:value 33   ] ,
@@ -226,11 +226,11 @@
         [ lv2:symbol "comp_threshold" ; pset:value -18.0 ] ,
         [ lv2:symbol "chord_type"     ; pset:value 0    ] .
 
-<https://github.com/richsio/autovocoder#preset/heavy_glide>
+<https://github.com/hotspoons/autovocoder#preset/heavy_glide>
     a pset:Preset ;
     rdfs:label "Heavy Glide" ;
     rdfs:comment "Chromatic mono with a long portamento. Slurred, dub-style pitch smears between words." ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
         [ lv2:symbol "mode"           ; pset:value 0    ] ,
         [ lv2:symbol "fixed_note"     ; pset:value 48   ] ,
@@ -245,11 +245,11 @@
         [ lv2:symbol "comp_threshold" ; pset:value -18.0 ] ,
         [ lv2:symbol "chord_type"     ; pset:value 1    ] .
 
-<https://github.com/richsio/autovocoder#preset/subtle_support>
+<https://github.com/hotspoons/autovocoder#preset/subtle_support>
     a pset:Preset ;
     rdfs:label "Subtle Support" ;
     rdfs:comment "Chromatic mono, 30% wet — layered under a real vocal. Low output gain so it tucks in." ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
         [ lv2:symbol "mode"           ; pset:value 0    ] ,
         [ lv2:symbol "fixed_note"     ; pset:value 48   ] ,
@@ -268,11 +268,11 @@
 #  Effect showcases — chorus + tremolo applied for character.
 # ============================================================================
 
-<https://github.com/richsio/autovocoder#preset/soundwave_stutter>
+<https://github.com/hotspoons/autovocoder#preset/soundwave_stutter>
     a pset:Preset ;
     rdfs:label "Soundwave Stutter" ;
     rdfs:comment "G1 Soundwave with a hard 8 Hz square chop. Each syllable gets sliced into staccato bursts — useful for villain monologues that need to feel mechanically interrupted." ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
         [ lv2:symbol "mode"               ; pset:value 3    ] ,
         [ lv2:symbol "fixed_note"         ; pset:value 36   ] ,
@@ -297,11 +297,11 @@
         [ lv2:symbol "trem_depth"         ; pset:value 1.0  ] ,
         [ lv2:symbol "trem_shape"         ; pset:value 1.0  ] .
 
-<https://github.com/richsio/autovocoder#preset/liquid_carrier>
+<https://github.com/hotspoons/autovocoder#preset/liquid_carrier>
     a pset:Preset ;
     rdfs:label "Liquid Carrier" ;
     rdfs:comment "Mono pitch tracking with a deep slow chorus on the carrier — the modulation runs *before* the vocoder, so the vocoded voice itself has a watery animated timbre rather than a chorused-output gloss." ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
         [ lv2:symbol "mode"               ; pset:value 0    ] ,
         [ lv2:symbol "fixed_note"         ; pset:value 48   ] ,
@@ -326,11 +326,11 @@
         [ lv2:symbol "trem_depth"         ; pset:value 0.7  ] ,
         [ lv2:symbol "trem_shape"         ; pset:value 0.0  ] .
 
-<https://github.com/richsio/autovocoder#preset/wormhole>
+<https://github.com/hotspoons/autovocoder#preset/wormhole>
     a pset:Preset ;
     rdfs:label "Wormhole" ;
     rdfs:comment "Fixed dim7 at E2 with both choruses running deep and slow. The two LFOs free-run, drifting in and out of phase — the result is a tonally-disorienting wash that's great under whispered narration." ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
         [ lv2:symbol "mode"               ; pset:value 3    ] ,
         [ lv2:symbol "fixed_note"         ; pset:value 40   ] ,
@@ -355,11 +355,11 @@
         [ lv2:symbol "trem_depth"         ; pset:value 0.7  ] ,
         [ lv2:symbol "trem_shape"         ; pset:value 0.0  ] .
 
-<https://github.com/richsio/autovocoder#preset/helicopter>
+<https://github.com/hotspoons/autovocoder#preset/helicopter>
     a pset:Preset ;
     rdfs:label "Helicopter" ;
     rdfs:comment "Hard-square tremolo at 14 Hz over a chromatic mono carrier. Speech turns into rotor blades — pitch still tracks, but the gating is loud enough to dominate." ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
         [ lv2:symbol "mode"               ; pset:value 0    ] ,
         [ lv2:symbol "fixed_note"         ; pset:value 48   ] ,
@@ -384,11 +384,11 @@
         [ lv2:symbol "trem_depth"         ; pset:value 1.0  ] ,
         [ lv2:symbol "trem_shape"         ; pset:value 1.0  ] .
 
-<https://github.com/richsio/autovocoder#preset/trance_gate_c>
+<https://github.com/hotspoons/autovocoder#preset/trance_gate_c>
     a pset:Preset ;
     rdfs:label "Trance Gate (C Major)" ;
     rdfs:comment "C-major auto-tune with a 6 Hz mostly-square gate plus a subtle output chorus. EDM sidechain feel without needing a sidechain. 4-on-the-floor not included." ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
         [ lv2:symbol "mode"               ; pset:value 0    ] ,
         [ lv2:symbol "fixed_note"         ; pset:value 48   ] ,
@@ -413,11 +413,11 @@
         [ lv2:symbol "trem_depth"         ; pset:value 0.85 ] ,
         [ lv2:symbol "trem_shape"         ; pset:value 0.85 ] .
 
-<https://github.com/richsio/autovocoder#preset/synthwave_pad>
+<https://github.com/hotspoons/autovocoder#preset/synthwave_pad>
     a pset:Preset ;
     rdfs:label "Synthwave Pad" ;
     rdfs:comment "Sus2 fixed chord at C3 with deep slow chorus on the output. Wide '80s pad — drape over an arpeggio or hold a single note for a long time." ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
         [ lv2:symbol "mode"               ; pset:value 3    ] ,
         [ lv2:symbol "fixed_note"         ; pset:value 48   ] ,
@@ -442,11 +442,11 @@
         [ lv2:symbol "trem_depth"         ; pset:value 0.7  ] ,
         [ lv2:symbol "trem_shape"         ; pset:value 0.0  ] .
 
-<https://github.com/richsio/autovocoder#preset/megatron>
+<https://github.com/hotspoons/autovocoder#preset/megatron>
     a pset:Preset ;
     rdfs:label "Megatron" ;
     rdfs:comment "A1 dominant-7th brawl with a slow square chop and a hint of carrier chorus. Heavier than Soundwave; less mech, more menace. Good for villains who don't need to stutter to be intimidating." ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
         [ lv2:symbol "mode"               ; pset:value 3    ] ,
         [ lv2:symbol "fixed_note"         ; pset:value 33   ] ,
@@ -471,11 +471,11 @@
         [ lv2:symbol "trem_depth"         ; pset:value 0.8  ] ,
         [ lv2:symbol "trem_shape"         ; pset:value 0.7  ] .
 
-<https://github.com/richsio/autovocoder#preset/robotic_telegraph>
+<https://github.com/hotspoons/autovocoder#preset/robotic_telegraph>
     a pset:Preset ;
     rdfs:label "Robotic Telegraph" ;
     rdfs:comment "Fixed A2 with a 10 Hz mostly-square tremolo. Speech turns into staccato robot Morse — single sustained line, sliced into bursts that follow the rhythm of the LFO rather than the speaker." ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
         [ lv2:symbol "mode"               ; pset:value 2    ] ,
         [ lv2:symbol "fixed_note"         ; pset:value 45   ] ,
@@ -500,11 +500,11 @@
         [ lv2:symbol "trem_depth"         ; pset:value 0.7  ] ,
         [ lv2:symbol "trem_shape"         ; pset:value 0.9  ] .
 
-<https://github.com/richsio/autovocoder#preset/tron_cycle>
+<https://github.com/hotspoons/autovocoder#preset/tron_cycle>
     a pset:Preset ;
     rdfs:label "Tron Cycle" ;
     rdfs:comment "Low power-chord at F#1 with deep carrier chorus and a slow sine tremolo. Light-cycle hum during a long straight — should sit beneath sound design rather than on top of it." ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
         [ lv2:symbol "mode"               ; pset:value 3    ] ,
         [ lv2:symbol "fixed_note"         ; pset:value 30   ] ,
@@ -529,11 +529,11 @@
         [ lv2:symbol "trem_depth"         ; pset:value 0.4  ] ,
         [ lv2:symbol "trem_shape"         ; pset:value 0.0  ] .
 
-<https://github.com/richsio/autovocoder#preset/vintage_choir_wash>
+<https://github.com/hotspoons/autovocoder#preset/vintage_choir_wash>
     a pset:Preset ;
     rdfs:label "Vintage Choir Wash" ;
     rdfs:comment "Major triad per detected note plus a subtle slow chorus on the output. Thick vintage-mellotron-style choir without the cheese — sit it under a real lead vocal." ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
         [ lv2:symbol "mode"               ; pset:value 1    ] ,
         [ lv2:symbol "fixed_note"         ; pset:value 48   ] ,
@@ -558,11 +558,11 @@
         [ lv2:symbol "trem_depth"         ; pset:value 0.7  ] ,
         [ lv2:symbol "trem_shape"         ; pset:value 0.0  ] .
 
-<https://github.com/richsio/autovocoder#preset/glitch_bot>
+<https://github.com/hotspoons/autovocoder#preset/glitch_bot>
     a pset:Preset ;
     rdfs:label "Glitch Bot" ;
     rdfs:comment "Augmented chord at D3, slow sharp-edged chop, animated chorus on the output. Sounds like a rhythm preset that nobody asked for but everybody needs once." ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
         [ lv2:symbol "mode"               ; pset:value 3    ] ,
         [ lv2:symbol "fixed_note"         ; pset:value 50   ] ,
@@ -587,11 +587,11 @@
         [ lv2:symbol "trem_depth"         ; pset:value 0.9  ] ,
         [ lv2:symbol "trem_shape"         ; pset:value 0.95 ] .
 
-<https://github.com/richsio/autovocoder#preset/cyberbird>
+<https://github.com/hotspoons/autovocoder#preset/cyberbird>
     a pset:Preset ;
     rdfs:label "Cyberbird" ;
     rdfs:comment "Mono pitch tracking with a fast carrier chorus and a subtle sine tremolo. Unstable, animated — somewhere between chirping and singing. Useful for inhuman creature voicing without going full robot." ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
         [ lv2:symbol "mode"               ; pset:value 0    ] ,
         [ lv2:symbol "fixed_note"         ; pset:value 48   ] ,

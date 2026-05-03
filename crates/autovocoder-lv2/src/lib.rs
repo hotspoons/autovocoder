@@ -82,7 +82,7 @@ pub struct LV2_Feature {
 
 // --- Plugin --------------------------------------------------------------
 
-const PLUGIN_URI: &[u8] = b"https://github.com/richsio/autovocoder\0";
+const PLUGIN_URI: &[u8] = b"https://github.com/hotspoons/autovocoder\0";
 
 // Port indices — MUST match autovocoder.ttl.
 const PORT_IN: u32 = 0;

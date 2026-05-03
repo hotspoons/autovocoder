@@ -2,7 +2,7 @@
 @prefix pset: <http://lv2plug.in/ns/ext/presets#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
-<https://github.com/richsio/autovocoder>
+<https://github.com/hotspoons/autovocoder>
     a lv2:Plugin ;
     lv2:binary <libautovocoder_lv2.so> ;
     rdfs:seeAlso <autovocoder.ttl> .
@@ -11,129 +11,129 @@
 # Each entry says "here is a Preset that applies to our plugin, its
 # details are in presets.ttl."
 
-<https://github.com/richsio/autovocoder#preset/soundwave_c2>
+<https://github.com/hotspoons/autovocoder#preset/soundwave_c2>
     a pset:Preset ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     rdfs:seeAlso <presets.ttl> .
 
-<https://github.com/richsio/autovocoder#preset/soundwave_c3>
+<https://github.com/hotspoons/autovocoder#preset/soundwave_c3>
     a pset:Preset ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     rdfs:seeAlso <presets.ttl> .
 
-<https://github.com/richsio/autovocoder#preset/intergalactic>
+<https://github.com/hotspoons/autovocoder#preset/intergalactic>
     a pset:Preset ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     rdfs:seeAlso <presets.ttl> .
 
-<https://github.com/richsio/autovocoder#preset/chromatic_robot>
+<https://github.com/hotspoons/autovocoder#preset/chromatic_robot>
     a pset:Preset ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     rdfs:seeAlso <presets.ttl> .
 
-<https://github.com/richsio/autovocoder#preset/in_key_c_major>
+<https://github.com/hotspoons/autovocoder#preset/in_key_c_major>
     a pset:Preset ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     rdfs:seeAlso <presets.ttl> .
 
-<https://github.com/richsio/autovocoder#preset/in_key_a_minor>
+<https://github.com/hotspoons/autovocoder#preset/in_key_a_minor>
     a pset:Preset ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     rdfs:seeAlso <presets.ttl> .
 
-<https://github.com/richsio/autovocoder#preset/dark_choir_am>
+<https://github.com/hotspoons/autovocoder#preset/dark_choir_am>
     a pset:Preset ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     rdfs:seeAlso <presets.ttl> .
 
-<https://github.com/richsio/autovocoder#preset/bright_angels_c>
+<https://github.com/hotspoons/autovocoder#preset/bright_angels_c>
     a pset:Preset ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     rdfs:seeAlso <presets.ttl> .
 
-<https://github.com/richsio/autovocoder#preset/heavy_glide>
+<https://github.com/hotspoons/autovocoder#preset/heavy_glide>
     a pset:Preset ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     rdfs:seeAlso <presets.ttl> .
 
-<https://github.com/richsio/autovocoder#preset/jazz_cafe_maj7>
+<https://github.com/hotspoons/autovocoder#preset/jazz_cafe_maj7>
     a pset:Preset ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     rdfs:seeAlso <presets.ttl> .
 
-<https://github.com/richsio/autovocoder#preset/ominous_dim7>
+<https://github.com/hotspoons/autovocoder#preset/ominous_dim7>
     a pset:Preset ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     rdfs:seeAlso <presets.ttl> .
 
-<https://github.com/richsio/autovocoder#preset/power_chord_robot>
+<https://github.com/hotspoons/autovocoder#preset/power_chord_robot>
     a pset:Preset ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     rdfs:seeAlso <presets.ttl> .
 
-<https://github.com/richsio/autovocoder#preset/subtle_support>
+<https://github.com/hotspoons/autovocoder#preset/subtle_support>
     a pset:Preset ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     rdfs:seeAlso <presets.ttl> .
 
 # --- Effect showcases ---
 
-<https://github.com/richsio/autovocoder#preset/soundwave_stutter>
+<https://github.com/hotspoons/autovocoder#preset/soundwave_stutter>
     a pset:Preset ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     rdfs:seeAlso <presets.ttl> .
 
-<https://github.com/richsio/autovocoder#preset/liquid_carrier>
+<https://github.com/hotspoons/autovocoder#preset/liquid_carrier>
     a pset:Preset ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     rdfs:seeAlso <presets.ttl> .
 
-<https://github.com/richsio/autovocoder#preset/wormhole>
+<https://github.com/hotspoons/autovocoder#preset/wormhole>
     a pset:Preset ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     rdfs:seeAlso <presets.ttl> .
 
-<https://github.com/richsio/autovocoder#preset/helicopter>
+<https://github.com/hotspoons/autovocoder#preset/helicopter>
     a pset:Preset ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     rdfs:seeAlso <presets.ttl> .
 
-<https://github.com/richsio/autovocoder#preset/trance_gate_c>
+<https://github.com/hotspoons/autovocoder#preset/trance_gate_c>
     a pset:Preset ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     rdfs:seeAlso <presets.ttl> .
 
-<https://github.com/richsio/autovocoder#preset/synthwave_pad>
+<https://github.com/hotspoons/autovocoder#preset/synthwave_pad>
     a pset:Preset ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     rdfs:seeAlso <presets.ttl> .
 
-<https://github.com/richsio/autovocoder#preset/megatron>
+<https://github.com/hotspoons/autovocoder#preset/megatron>
     a pset:Preset ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     rdfs:seeAlso <presets.ttl> .
 
-<https://github.com/richsio/autovocoder#preset/robotic_telegraph>
+<https://github.com/hotspoons/autovocoder#preset/robotic_telegraph>
     a pset:Preset ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     rdfs:seeAlso <presets.ttl> .
 
-<https://github.com/richsio/autovocoder#preset/tron_cycle>
+<https://github.com/hotspoons/autovocoder#preset/tron_cycle>
     a pset:Preset ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     rdfs:seeAlso <presets.ttl> .
 
-<https://github.com/richsio/autovocoder#preset/vintage_choir_wash>
+<https://github.com/hotspoons/autovocoder#preset/vintage_choir_wash>
     a pset:Preset ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     rdfs:seeAlso <presets.ttl> .
 
-<https://github.com/richsio/autovocoder#preset/glitch_bot>
+<https://github.com/hotspoons/autovocoder#preset/glitch_bot>
     a pset:Preset ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     rdfs:seeAlso <presets.ttl> .
 
-<https://github.com/richsio/autovocoder#preset/cyberbird>
+<https://github.com/hotspoons/autovocoder#preset/cyberbird>
     a pset:Preset ;
-    lv2:appliesTo <https://github.com/richsio/autovocoder> ;
+    lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     rdfs:seeAlso <presets.ttl> .
