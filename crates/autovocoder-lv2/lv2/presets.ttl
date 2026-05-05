@@ -2,7 +2,12 @@
 @prefix pset: <http://lv2plug.in/ns/ext/presets#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
-# Each preset snapshots the full port list (host-independent).
+# Each preset snapshots the full control-port list (host-independent).
+# Every preset sets every control port so that loading any preset gives a
+# fully predictable state — no inheritance from whatever was loaded before.
+# When a preset doesn't care about a given effect, it explicitly sets that
+# effect off (or to its neutral default).
+#
 # Port reference:
 #   mode:       0=mono, 1=chord(tracks), 2=fixed, 3=fixed_chord
 #   scale:      0=chromatic, 1=major, 2=minor
@@ -10,12 +15,8 @@
 #               7=maj7 8=min7 9=dom7 10=dim7 11=halfdim7
 #               12=add9 13=dom9 14=min9
 #   pitch_algo: 0=YIN(classic) 1=YIN(FFT) 2=FFT(HPS)
-#
-# Effect presets below set every control port (including chorus + tremolo)
-# so loading them gives a known clean state regardless of what was loaded
-# before. The legacy presets above only set ports 0-13 — by default they
-# inherit whatever was set previously for the new effects, which is fine
-# in practice but documented here so it isn't a surprise.
+#   trem_target: 0=output 1=carrier 2=both 3=modulator
+#   drive_mode: 0=soft 1=tube 2=fuzz
 
 <https://github.com/hotspoons/autovocoder#preset/soundwave_c2>
     a pset:Preset ;
@@ -23,18 +24,38 @@
     rdfs:comment "Authentic G1 Soundwave: fixed-root minor triad at C2. Scott Brownlee mixed Frank Welker's flat monotone delivery with chord-based vocoder carrier — this is that." ;
     lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
-        [ lv2:symbol "mode"           ; pset:value 3    ] ,
-        [ lv2:symbol "fixed_note"     ; pset:value 36   ] ,
-        [ lv2:symbol "scale"          ; pset:value 0    ] ,
-        [ lv2:symbol "scale_root"     ; pset:value 0    ] ,
-        [ lv2:symbol "mix"            ; pset:value 1.0  ] ,
-        [ lv2:symbol "portamento"     ; pset:value 25.0 ] ,
-        [ lv2:symbol "carrier_level"  ; pset:value 0.6  ] ,
-        [ lv2:symbol "input_gain"     ; pset:value 9.0  ] ,
-        [ lv2:symbol "output_gain"    ; pset:value 6.0  ] ,
-        [ lv2:symbol "comp_on"        ; pset:value 1    ] ,
-        [ lv2:symbol "comp_threshold" ; pset:value -18.0 ] ,
-        [ lv2:symbol "chord_type"     ; pset:value 2    ] .
+        [ lv2:symbol "mode"               ; pset:value 3    ] ,
+        [ lv2:symbol "fixed_note"         ; pset:value 36   ] ,
+        [ lv2:symbol "scale"              ; pset:value 0    ] ,
+        [ lv2:symbol "scale_root"         ; pset:value 0    ] ,
+        [ lv2:symbol "mix"                ; pset:value 1.0  ] ,
+        [ lv2:symbol "portamento"         ; pset:value 25.0 ] ,
+        [ lv2:symbol "carrier_level"      ; pset:value 0.6  ] ,
+        [ lv2:symbol "input_gain"         ; pset:value 9.0  ] ,
+        [ lv2:symbol "output_gain"        ; pset:value 6.0  ] ,
+        [ lv2:symbol "comp_on"            ; pset:value 1    ] ,
+        [ lv2:symbol "comp_threshold"     ; pset:value -18.0 ] ,
+        [ lv2:symbol "chord_type"         ; pset:value 2    ] ,
+        [ lv2:symbol "pitch_algo"         ; pset:value 1    ] ,
+        [ lv2:symbol "carrier_chorus_on"  ; pset:value 0    ] ,
+        [ lv2:symbol "output_chorus_on"   ; pset:value 0    ] ,
+        [ lv2:symbol "chorus_rate"        ; pset:value 0.7  ] ,
+        [ lv2:symbol "chorus_depth"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "chorus_mix"         ; pset:value 0.5  ] ,
+        [ lv2:symbol "trem_on"            ; pset:value 0    ] ,
+        [ lv2:symbol "trem_rate"          ; pset:value 5.0  ] ,
+        [ lv2:symbol "trem_depth"         ; pset:value 0.7  ] ,
+        [ lv2:symbol "trem_shape"         ; pset:value 0.0  ] ,
+        [ lv2:symbol "trem_target"        ; pset:value 0    ] ,
+        [ lv2:symbol "pre_drive_on"       ; pset:value 0    ] ,
+        [ lv2:symbol "post_drive_on"      ; pset:value 0    ] ,
+        [ lv2:symbol "drive_mode"         ; pset:value 1    ] ,
+        [ lv2:symbol "drive_amount"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "crusher_on"         ; pset:value 0    ] ,
+        [ lv2:symbol "crusher_bits"       ; pset:value 16   ] ,
+        [ lv2:symbol "crusher_rate"       ; pset:value 1.0  ] ,
+        [ lv2:symbol "sub_on"             ; pset:value 0    ] ,
+        [ lv2:symbol "sub_level"          ; pset:value 0.5  ] .
 
 <https://github.com/hotspoons/autovocoder#preset/soundwave_c3>
     a pset:Preset ;
@@ -42,18 +63,38 @@
     rdfs:comment "Same Soundwave chord stack an octave up — more intelligible, less menacing." ;
     lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
-        [ lv2:symbol "mode"           ; pset:value 3    ] ,
-        [ lv2:symbol "fixed_note"     ; pset:value 48   ] ,
-        [ lv2:symbol "scale"          ; pset:value 0    ] ,
-        [ lv2:symbol "scale_root"     ; pset:value 0    ] ,
-        [ lv2:symbol "mix"            ; pset:value 1.0  ] ,
-        [ lv2:symbol "portamento"     ; pset:value 25.0 ] ,
-        [ lv2:symbol "carrier_level"  ; pset:value 0.6  ] ,
-        [ lv2:symbol "input_gain"     ; pset:value 9.0  ] ,
-        [ lv2:symbol "output_gain"    ; pset:value 6.0  ] ,
-        [ lv2:symbol "comp_on"        ; pset:value 1    ] ,
-        [ lv2:symbol "comp_threshold" ; pset:value -18.0 ] ,
-        [ lv2:symbol "chord_type"     ; pset:value 2    ] .
+        [ lv2:symbol "mode"               ; pset:value 3    ] ,
+        [ lv2:symbol "fixed_note"         ; pset:value 48   ] ,
+        [ lv2:symbol "scale"              ; pset:value 0    ] ,
+        [ lv2:symbol "scale_root"         ; pset:value 0    ] ,
+        [ lv2:symbol "mix"                ; pset:value 1.0  ] ,
+        [ lv2:symbol "portamento"         ; pset:value 25.0 ] ,
+        [ lv2:symbol "carrier_level"      ; pset:value 0.6  ] ,
+        [ lv2:symbol "input_gain"         ; pset:value 9.0  ] ,
+        [ lv2:symbol "output_gain"        ; pset:value 6.0  ] ,
+        [ lv2:symbol "comp_on"            ; pset:value 1    ] ,
+        [ lv2:symbol "comp_threshold"     ; pset:value -18.0 ] ,
+        [ lv2:symbol "chord_type"         ; pset:value 2    ] ,
+        [ lv2:symbol "pitch_algo"         ; pset:value 1    ] ,
+        [ lv2:symbol "carrier_chorus_on"  ; pset:value 0    ] ,
+        [ lv2:symbol "output_chorus_on"   ; pset:value 0    ] ,
+        [ lv2:symbol "chorus_rate"        ; pset:value 0.7  ] ,
+        [ lv2:symbol "chorus_depth"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "chorus_mix"         ; pset:value 0.5  ] ,
+        [ lv2:symbol "trem_on"            ; pset:value 0    ] ,
+        [ lv2:symbol "trem_rate"          ; pset:value 5.0  ] ,
+        [ lv2:symbol "trem_depth"         ; pset:value 0.7  ] ,
+        [ lv2:symbol "trem_shape"         ; pset:value 0.0  ] ,
+        [ lv2:symbol "trem_target"        ; pset:value 0    ] ,
+        [ lv2:symbol "pre_drive_on"       ; pset:value 0    ] ,
+        [ lv2:symbol "post_drive_on"      ; pset:value 0    ] ,
+        [ lv2:symbol "drive_mode"         ; pset:value 1    ] ,
+        [ lv2:symbol "drive_amount"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "crusher_on"         ; pset:value 0    ] ,
+        [ lv2:symbol "crusher_bits"       ; pset:value 16   ] ,
+        [ lv2:symbol "crusher_rate"       ; pset:value 1.0  ] ,
+        [ lv2:symbol "sub_on"             ; pset:value 0    ] ,
+        [ lv2:symbol "sub_level"          ; pset:value 0.5  ] .
 
 <https://github.com/hotspoons/autovocoder#preset/intergalactic>
     a pset:Preset ;
@@ -61,18 +102,38 @@
     rdfs:comment "Beastie Boys vocoder-refrain vibe: fixed A2, snappy glide, bright carrier, hot output." ;
     lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
-        [ lv2:symbol "mode"           ; pset:value 2    ] ,
-        [ lv2:symbol "fixed_note"     ; pset:value 45   ] ,
-        [ lv2:symbol "scale"          ; pset:value 0    ] ,
-        [ lv2:symbol "scale_root"     ; pset:value 0    ] ,
-        [ lv2:symbol "mix"            ; pset:value 1.0  ] ,
-        [ lv2:symbol "portamento"     ; pset:value 12.0 ] ,
-        [ lv2:symbol "carrier_level"  ; pset:value 0.8  ] ,
-        [ lv2:symbol "input_gain"     ; pset:value 12.0 ] ,
-        [ lv2:symbol "output_gain"    ; pset:value 9.0  ] ,
-        [ lv2:symbol "comp_on"        ; pset:value 1    ] ,
-        [ lv2:symbol "comp_threshold" ; pset:value -20.0 ] ,
-        [ lv2:symbol "chord_type"     ; pset:value 1    ] .
+        [ lv2:symbol "mode"               ; pset:value 2    ] ,
+        [ lv2:symbol "fixed_note"         ; pset:value 45   ] ,
+        [ lv2:symbol "scale"              ; pset:value 0    ] ,
+        [ lv2:symbol "scale_root"         ; pset:value 0    ] ,
+        [ lv2:symbol "mix"                ; pset:value 1.0  ] ,
+        [ lv2:symbol "portamento"         ; pset:value 12.0 ] ,
+        [ lv2:symbol "carrier_level"      ; pset:value 0.8  ] ,
+        [ lv2:symbol "input_gain"         ; pset:value 12.0 ] ,
+        [ lv2:symbol "output_gain"        ; pset:value 9.0  ] ,
+        [ lv2:symbol "comp_on"            ; pset:value 1    ] ,
+        [ lv2:symbol "comp_threshold"     ; pset:value -20.0 ] ,
+        [ lv2:symbol "chord_type"         ; pset:value 1    ] ,
+        [ lv2:symbol "pitch_algo"         ; pset:value 1    ] ,
+        [ lv2:symbol "carrier_chorus_on"  ; pset:value 0    ] ,
+        [ lv2:symbol "output_chorus_on"   ; pset:value 0    ] ,
+        [ lv2:symbol "chorus_rate"        ; pset:value 0.7  ] ,
+        [ lv2:symbol "chorus_depth"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "chorus_mix"         ; pset:value 0.5  ] ,
+        [ lv2:symbol "trem_on"            ; pset:value 0    ] ,
+        [ lv2:symbol "trem_rate"          ; pset:value 5.0  ] ,
+        [ lv2:symbol "trem_depth"         ; pset:value 0.7  ] ,
+        [ lv2:symbol "trem_shape"         ; pset:value 0.0  ] ,
+        [ lv2:symbol "trem_target"        ; pset:value 0    ] ,
+        [ lv2:symbol "pre_drive_on"       ; pset:value 0    ] ,
+        [ lv2:symbol "post_drive_on"      ; pset:value 0    ] ,
+        [ lv2:symbol "drive_mode"         ; pset:value 1    ] ,
+        [ lv2:symbol "drive_amount"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "crusher_on"         ; pset:value 0    ] ,
+        [ lv2:symbol "crusher_bits"       ; pset:value 16   ] ,
+        [ lv2:symbol "crusher_rate"       ; pset:value 1.0  ] ,
+        [ lv2:symbol "sub_on"             ; pset:value 0    ] ,
+        [ lv2:symbol "sub_level"          ; pset:value 0.5  ] .
 
 <https://github.com/hotspoons/autovocoder#preset/chromatic_robot>
     a pset:Preset ;
@@ -80,18 +141,38 @@
     rdfs:comment "Tracks the singer's pitch on a chromatic grid. Snappy portamento for a mechanical feel." ;
     lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
-        [ lv2:symbol "mode"           ; pset:value 0    ] ,
-        [ lv2:symbol "fixed_note"     ; pset:value 48   ] ,
-        [ lv2:symbol "scale"          ; pset:value 0    ] ,
-        [ lv2:symbol "scale_root"     ; pset:value 0    ] ,
-        [ lv2:symbol "mix"            ; pset:value 1.0  ] ,
-        [ lv2:symbol "portamento"     ; pset:value 8.0  ] ,
-        [ lv2:symbol "carrier_level"  ; pset:value 0.6  ] ,
-        [ lv2:symbol "input_gain"     ; pset:value 9.0  ] ,
-        [ lv2:symbol "output_gain"    ; pset:value 6.0  ] ,
-        [ lv2:symbol "comp_on"        ; pset:value 1    ] ,
-        [ lv2:symbol "comp_threshold" ; pset:value -18.0 ] ,
-        [ lv2:symbol "chord_type"     ; pset:value 1    ] .
+        [ lv2:symbol "mode"               ; pset:value 0    ] ,
+        [ lv2:symbol "fixed_note"         ; pset:value 48   ] ,
+        [ lv2:symbol "scale"              ; pset:value 0    ] ,
+        [ lv2:symbol "scale_root"         ; pset:value 0    ] ,
+        [ lv2:symbol "mix"                ; pset:value 1.0  ] ,
+        [ lv2:symbol "portamento"         ; pset:value 8.0  ] ,
+        [ lv2:symbol "carrier_level"      ; pset:value 0.6  ] ,
+        [ lv2:symbol "input_gain"         ; pset:value 9.0  ] ,
+        [ lv2:symbol "output_gain"        ; pset:value 6.0  ] ,
+        [ lv2:symbol "comp_on"            ; pset:value 1    ] ,
+        [ lv2:symbol "comp_threshold"     ; pset:value -18.0 ] ,
+        [ lv2:symbol "chord_type"         ; pset:value 1    ] ,
+        [ lv2:symbol "pitch_algo"         ; pset:value 1    ] ,
+        [ lv2:symbol "carrier_chorus_on"  ; pset:value 0    ] ,
+        [ lv2:symbol "output_chorus_on"   ; pset:value 0    ] ,
+        [ lv2:symbol "chorus_rate"        ; pset:value 0.7  ] ,
+        [ lv2:symbol "chorus_depth"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "chorus_mix"         ; pset:value 0.5  ] ,
+        [ lv2:symbol "trem_on"            ; pset:value 0    ] ,
+        [ lv2:symbol "trem_rate"          ; pset:value 5.0  ] ,
+        [ lv2:symbol "trem_depth"         ; pset:value 0.7  ] ,
+        [ lv2:symbol "trem_shape"         ; pset:value 0.0  ] ,
+        [ lv2:symbol "trem_target"        ; pset:value 0    ] ,
+        [ lv2:symbol "pre_drive_on"       ; pset:value 0    ] ,
+        [ lv2:symbol "post_drive_on"      ; pset:value 0    ] ,
+        [ lv2:symbol "drive_mode"         ; pset:value 1    ] ,
+        [ lv2:symbol "drive_amount"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "crusher_on"         ; pset:value 0    ] ,
+        [ lv2:symbol "crusher_bits"       ; pset:value 16   ] ,
+        [ lv2:symbol "crusher_rate"       ; pset:value 1.0  ] ,
+        [ lv2:symbol "sub_on"             ; pset:value 0    ] ,
+        [ lv2:symbol "sub_level"          ; pset:value 0.5  ] .
 
 <https://github.com/hotspoons/autovocoder#preset/in_key_c_major>
     a pset:Preset ;
@@ -99,18 +180,38 @@
     rdfs:comment "Follows pitch but snaps to C major. Sing wrong, sound right." ;
     lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
-        [ lv2:symbol "mode"           ; pset:value 0    ] ,
-        [ lv2:symbol "fixed_note"     ; pset:value 48   ] ,
-        [ lv2:symbol "scale"          ; pset:value 1    ] ,
-        [ lv2:symbol "scale_root"     ; pset:value 0    ] ,
-        [ lv2:symbol "mix"            ; pset:value 1.0  ] ,
-        [ lv2:symbol "portamento"     ; pset:value 20.0 ] ,
-        [ lv2:symbol "carrier_level"  ; pset:value 0.6  ] ,
-        [ lv2:symbol "input_gain"     ; pset:value 9.0  ] ,
-        [ lv2:symbol "output_gain"    ; pset:value 6.0  ] ,
-        [ lv2:symbol "comp_on"        ; pset:value 1    ] ,
-        [ lv2:symbol "comp_threshold" ; pset:value -18.0 ] ,
-        [ lv2:symbol "chord_type"     ; pset:value 1    ] .
+        [ lv2:symbol "mode"               ; pset:value 0    ] ,
+        [ lv2:symbol "fixed_note"         ; pset:value 48   ] ,
+        [ lv2:symbol "scale"              ; pset:value 1    ] ,
+        [ lv2:symbol "scale_root"         ; pset:value 0    ] ,
+        [ lv2:symbol "mix"                ; pset:value 1.0  ] ,
+        [ lv2:symbol "portamento"         ; pset:value 20.0 ] ,
+        [ lv2:symbol "carrier_level"      ; pset:value 0.6  ] ,
+        [ lv2:symbol "input_gain"         ; pset:value 9.0  ] ,
+        [ lv2:symbol "output_gain"        ; pset:value 6.0  ] ,
+        [ lv2:symbol "comp_on"            ; pset:value 1    ] ,
+        [ lv2:symbol "comp_threshold"     ; pset:value -18.0 ] ,
+        [ lv2:symbol "chord_type"         ; pset:value 1    ] ,
+        [ lv2:symbol "pitch_algo"         ; pset:value 1    ] ,
+        [ lv2:symbol "carrier_chorus_on"  ; pset:value 0    ] ,
+        [ lv2:symbol "output_chorus_on"   ; pset:value 0    ] ,
+        [ lv2:symbol "chorus_rate"        ; pset:value 0.7  ] ,
+        [ lv2:symbol "chorus_depth"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "chorus_mix"         ; pset:value 0.5  ] ,
+        [ lv2:symbol "trem_on"            ; pset:value 0    ] ,
+        [ lv2:symbol "trem_rate"          ; pset:value 5.0  ] ,
+        [ lv2:symbol "trem_depth"         ; pset:value 0.7  ] ,
+        [ lv2:symbol "trem_shape"         ; pset:value 0.0  ] ,
+        [ lv2:symbol "trem_target"        ; pset:value 0    ] ,
+        [ lv2:symbol "pre_drive_on"       ; pset:value 0    ] ,
+        [ lv2:symbol "post_drive_on"      ; pset:value 0    ] ,
+        [ lv2:symbol "drive_mode"         ; pset:value 1    ] ,
+        [ lv2:symbol "drive_amount"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "crusher_on"         ; pset:value 0    ] ,
+        [ lv2:symbol "crusher_bits"       ; pset:value 16   ] ,
+        [ lv2:symbol "crusher_rate"       ; pset:value 1.0  ] ,
+        [ lv2:symbol "sub_on"             ; pset:value 0    ] ,
+        [ lv2:symbol "sub_level"          ; pset:value 0.5  ] .
 
 <https://github.com/hotspoons/autovocoder#preset/in_key_a_minor>
     a pset:Preset ;
@@ -118,18 +219,38 @@
     rdfs:comment "Melodic, natural-minor vocoder line. Good backing-vocal preset." ;
     lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
-        [ lv2:symbol "mode"           ; pset:value 0    ] ,
-        [ lv2:symbol "fixed_note"     ; pset:value 48   ] ,
-        [ lv2:symbol "scale"          ; pset:value 2    ] ,
-        [ lv2:symbol "scale_root"     ; pset:value 9    ] ,
-        [ lv2:symbol "mix"            ; pset:value 1.0  ] ,
-        [ lv2:symbol "portamento"     ; pset:value 20.0 ] ,
-        [ lv2:symbol "carrier_level"  ; pset:value 0.6  ] ,
-        [ lv2:symbol "input_gain"     ; pset:value 9.0  ] ,
-        [ lv2:symbol "output_gain"    ; pset:value 6.0  ] ,
-        [ lv2:symbol "comp_on"        ; pset:value 1    ] ,
-        [ lv2:symbol "comp_threshold" ; pset:value -18.0 ] ,
-        [ lv2:symbol "chord_type"     ; pset:value 1    ] .
+        [ lv2:symbol "mode"               ; pset:value 0    ] ,
+        [ lv2:symbol "fixed_note"         ; pset:value 48   ] ,
+        [ lv2:symbol "scale"              ; pset:value 2    ] ,
+        [ lv2:symbol "scale_root"         ; pset:value 9    ] ,
+        [ lv2:symbol "mix"                ; pset:value 1.0  ] ,
+        [ lv2:symbol "portamento"         ; pset:value 20.0 ] ,
+        [ lv2:symbol "carrier_level"      ; pset:value 0.6  ] ,
+        [ lv2:symbol "input_gain"         ; pset:value 9.0  ] ,
+        [ lv2:symbol "output_gain"        ; pset:value 6.0  ] ,
+        [ lv2:symbol "comp_on"            ; pset:value 1    ] ,
+        [ lv2:symbol "comp_threshold"     ; pset:value -18.0 ] ,
+        [ lv2:symbol "chord_type"         ; pset:value 1    ] ,
+        [ lv2:symbol "pitch_algo"         ; pset:value 1    ] ,
+        [ lv2:symbol "carrier_chorus_on"  ; pset:value 0    ] ,
+        [ lv2:symbol "output_chorus_on"   ; pset:value 0    ] ,
+        [ lv2:symbol "chorus_rate"        ; pset:value 0.7  ] ,
+        [ lv2:symbol "chorus_depth"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "chorus_mix"         ; pset:value 0.5  ] ,
+        [ lv2:symbol "trem_on"            ; pset:value 0    ] ,
+        [ lv2:symbol "trem_rate"          ; pset:value 5.0  ] ,
+        [ lv2:symbol "trem_depth"         ; pset:value 0.7  ] ,
+        [ lv2:symbol "trem_shape"         ; pset:value 0.0  ] ,
+        [ lv2:symbol "trem_target"        ; pset:value 0    ] ,
+        [ lv2:symbol "pre_drive_on"       ; pset:value 0    ] ,
+        [ lv2:symbol "post_drive_on"      ; pset:value 0    ] ,
+        [ lv2:symbol "drive_mode"         ; pset:value 1    ] ,
+        [ lv2:symbol "drive_amount"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "crusher_on"         ; pset:value 0    ] ,
+        [ lv2:symbol "crusher_bits"       ; pset:value 16   ] ,
+        [ lv2:symbol "crusher_rate"       ; pset:value 1.0  ] ,
+        [ lv2:symbol "sub_on"             ; pset:value 0    ] ,
+        [ lv2:symbol "sub_level"          ; pset:value 0.5  ] .
 
 <https://github.com/hotspoons/autovocoder#preset/dark_choir_am>
     a pset:Preset ;
@@ -137,18 +258,38 @@
     rdfs:comment "Each detected note sprouts a minor triad. Spreads a single voice into an eerie pad." ;
     lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
-        [ lv2:symbol "mode"           ; pset:value 1    ] ,
-        [ lv2:symbol "fixed_note"     ; pset:value 48   ] ,
-        [ lv2:symbol "scale"          ; pset:value 2    ] ,
-        [ lv2:symbol "scale_root"     ; pset:value 9    ] ,
-        [ lv2:symbol "mix"            ; pset:value 1.0  ] ,
-        [ lv2:symbol "portamento"     ; pset:value 40.0 ] ,
-        [ lv2:symbol "carrier_level"  ; pset:value 0.5  ] ,
-        [ lv2:symbol "input_gain"     ; pset:value 9.0  ] ,
-        [ lv2:symbol "output_gain"    ; pset:value 6.0  ] ,
-        [ lv2:symbol "comp_on"        ; pset:value 1    ] ,
-        [ lv2:symbol "comp_threshold" ; pset:value -18.0 ] ,
-        [ lv2:symbol "chord_type"     ; pset:value 2    ] .
+        [ lv2:symbol "mode"               ; pset:value 1    ] ,
+        [ lv2:symbol "fixed_note"         ; pset:value 48   ] ,
+        [ lv2:symbol "scale"              ; pset:value 2    ] ,
+        [ lv2:symbol "scale_root"         ; pset:value 9    ] ,
+        [ lv2:symbol "mix"                ; pset:value 1.0  ] ,
+        [ lv2:symbol "portamento"         ; pset:value 40.0 ] ,
+        [ lv2:symbol "carrier_level"      ; pset:value 0.5  ] ,
+        [ lv2:symbol "input_gain"         ; pset:value 9.0  ] ,
+        [ lv2:symbol "output_gain"        ; pset:value 6.0  ] ,
+        [ lv2:symbol "comp_on"            ; pset:value 1    ] ,
+        [ lv2:symbol "comp_threshold"     ; pset:value -18.0 ] ,
+        [ lv2:symbol "chord_type"         ; pset:value 2    ] ,
+        [ lv2:symbol "pitch_algo"         ; pset:value 1    ] ,
+        [ lv2:symbol "carrier_chorus_on"  ; pset:value 0    ] ,
+        [ lv2:symbol "output_chorus_on"   ; pset:value 0    ] ,
+        [ lv2:symbol "chorus_rate"        ; pset:value 0.7  ] ,
+        [ lv2:symbol "chorus_depth"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "chorus_mix"         ; pset:value 0.5  ] ,
+        [ lv2:symbol "trem_on"            ; pset:value 0    ] ,
+        [ lv2:symbol "trem_rate"          ; pset:value 5.0  ] ,
+        [ lv2:symbol "trem_depth"         ; pset:value 0.7  ] ,
+        [ lv2:symbol "trem_shape"         ; pset:value 0.0  ] ,
+        [ lv2:symbol "trem_target"        ; pset:value 0    ] ,
+        [ lv2:symbol "pre_drive_on"       ; pset:value 0    ] ,
+        [ lv2:symbol "post_drive_on"      ; pset:value 0    ] ,
+        [ lv2:symbol "drive_mode"         ; pset:value 1    ] ,
+        [ lv2:symbol "drive_amount"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "crusher_on"         ; pset:value 0    ] ,
+        [ lv2:symbol "crusher_bits"       ; pset:value 16   ] ,
+        [ lv2:symbol "crusher_rate"       ; pset:value 1.0  ] ,
+        [ lv2:symbol "sub_on"             ; pset:value 0    ] ,
+        [ lv2:symbol "sub_level"          ; pset:value 0.5  ] .
 
 <https://github.com/hotspoons/autovocoder#preset/bright_angels_c>
     a pset:Preset ;
@@ -156,18 +297,38 @@
     rdfs:comment "Major triad per detected note, snapped to C major. Heavenly Auto-Tune-on-steroids vibe." ;
     lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
-        [ lv2:symbol "mode"           ; pset:value 1    ] ,
-        [ lv2:symbol "fixed_note"     ; pset:value 48   ] ,
-        [ lv2:symbol "scale"          ; pset:value 1    ] ,
-        [ lv2:symbol "scale_root"     ; pset:value 0    ] ,
-        [ lv2:symbol "mix"            ; pset:value 1.0  ] ,
-        [ lv2:symbol "portamento"     ; pset:value 30.0 ] ,
-        [ lv2:symbol "carrier_level"  ; pset:value 0.5  ] ,
-        [ lv2:symbol "input_gain"     ; pset:value 9.0  ] ,
-        [ lv2:symbol "output_gain"    ; pset:value 6.0  ] ,
-        [ lv2:symbol "comp_on"        ; pset:value 1    ] ,
-        [ lv2:symbol "comp_threshold" ; pset:value -18.0 ] ,
-        [ lv2:symbol "chord_type"     ; pset:value 1    ] .
+        [ lv2:symbol "mode"               ; pset:value 1    ] ,
+        [ lv2:symbol "fixed_note"         ; pset:value 48   ] ,
+        [ lv2:symbol "scale"              ; pset:value 1    ] ,
+        [ lv2:symbol "scale_root"         ; pset:value 0    ] ,
+        [ lv2:symbol "mix"                ; pset:value 1.0  ] ,
+        [ lv2:symbol "portamento"         ; pset:value 30.0 ] ,
+        [ lv2:symbol "carrier_level"      ; pset:value 0.5  ] ,
+        [ lv2:symbol "input_gain"         ; pset:value 9.0  ] ,
+        [ lv2:symbol "output_gain"        ; pset:value 6.0  ] ,
+        [ lv2:symbol "comp_on"            ; pset:value 1    ] ,
+        [ lv2:symbol "comp_threshold"     ; pset:value -18.0 ] ,
+        [ lv2:symbol "chord_type"         ; pset:value 1    ] ,
+        [ lv2:symbol "pitch_algo"         ; pset:value 1    ] ,
+        [ lv2:symbol "carrier_chorus_on"  ; pset:value 0    ] ,
+        [ lv2:symbol "output_chorus_on"   ; pset:value 0    ] ,
+        [ lv2:symbol "chorus_rate"        ; pset:value 0.7  ] ,
+        [ lv2:symbol "chorus_depth"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "chorus_mix"         ; pset:value 0.5  ] ,
+        [ lv2:symbol "trem_on"            ; pset:value 0    ] ,
+        [ lv2:symbol "trem_rate"          ; pset:value 5.0  ] ,
+        [ lv2:symbol "trem_depth"         ; pset:value 0.7  ] ,
+        [ lv2:symbol "trem_shape"         ; pset:value 0.0  ] ,
+        [ lv2:symbol "trem_target"        ; pset:value 0    ] ,
+        [ lv2:symbol "pre_drive_on"       ; pset:value 0    ] ,
+        [ lv2:symbol "post_drive_on"      ; pset:value 0    ] ,
+        [ lv2:symbol "drive_mode"         ; pset:value 1    ] ,
+        [ lv2:symbol "drive_amount"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "crusher_on"         ; pset:value 0    ] ,
+        [ lv2:symbol "crusher_bits"       ; pset:value 16   ] ,
+        [ lv2:symbol "crusher_rate"       ; pset:value 1.0  ] ,
+        [ lv2:symbol "sub_on"             ; pset:value 0    ] ,
+        [ lv2:symbol "sub_level"          ; pset:value 0.5  ] .
 
 <https://github.com/hotspoons/autovocoder#preset/jazz_cafe_maj7>
     a pset:Preset ;
@@ -175,18 +336,38 @@
     rdfs:comment "Major-7th voicing on every note. Smooth, late-night, a little unresolved." ;
     lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
-        [ lv2:symbol "mode"           ; pset:value 1    ] ,
-        [ lv2:symbol "fixed_note"     ; pset:value 48   ] ,
-        [ lv2:symbol "scale"          ; pset:value 1    ] ,
-        [ lv2:symbol "scale_root"     ; pset:value 0    ] ,
-        [ lv2:symbol "mix"            ; pset:value 1.0  ] ,
-        [ lv2:symbol "portamento"     ; pset:value 35.0 ] ,
-        [ lv2:symbol "carrier_level"  ; pset:value 0.45 ] ,
-        [ lv2:symbol "input_gain"     ; pset:value 9.0  ] ,
-        [ lv2:symbol "output_gain"    ; pset:value 6.0  ] ,
-        [ lv2:symbol "comp_on"        ; pset:value 1    ] ,
-        [ lv2:symbol "comp_threshold" ; pset:value -18.0 ] ,
-        [ lv2:symbol "chord_type"     ; pset:value 7    ] .
+        [ lv2:symbol "mode"               ; pset:value 1    ] ,
+        [ lv2:symbol "fixed_note"         ; pset:value 48   ] ,
+        [ lv2:symbol "scale"              ; pset:value 1    ] ,
+        [ lv2:symbol "scale_root"         ; pset:value 0    ] ,
+        [ lv2:symbol "mix"                ; pset:value 1.0  ] ,
+        [ lv2:symbol "portamento"         ; pset:value 35.0 ] ,
+        [ lv2:symbol "carrier_level"      ; pset:value 0.45 ] ,
+        [ lv2:symbol "input_gain"         ; pset:value 9.0  ] ,
+        [ lv2:symbol "output_gain"        ; pset:value 6.0  ] ,
+        [ lv2:symbol "comp_on"            ; pset:value 1    ] ,
+        [ lv2:symbol "comp_threshold"     ; pset:value -18.0 ] ,
+        [ lv2:symbol "chord_type"         ; pset:value 7    ] ,
+        [ lv2:symbol "pitch_algo"         ; pset:value 1    ] ,
+        [ lv2:symbol "carrier_chorus_on"  ; pset:value 0    ] ,
+        [ lv2:symbol "output_chorus_on"   ; pset:value 0    ] ,
+        [ lv2:symbol "chorus_rate"        ; pset:value 0.7  ] ,
+        [ lv2:symbol "chorus_depth"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "chorus_mix"         ; pset:value 0.5  ] ,
+        [ lv2:symbol "trem_on"            ; pset:value 0    ] ,
+        [ lv2:symbol "trem_rate"          ; pset:value 5.0  ] ,
+        [ lv2:symbol "trem_depth"         ; pset:value 0.7  ] ,
+        [ lv2:symbol "trem_shape"         ; pset:value 0.0  ] ,
+        [ lv2:symbol "trem_target"        ; pset:value 0    ] ,
+        [ lv2:symbol "pre_drive_on"       ; pset:value 0    ] ,
+        [ lv2:symbol "post_drive_on"      ; pset:value 0    ] ,
+        [ lv2:symbol "drive_mode"         ; pset:value 1    ] ,
+        [ lv2:symbol "drive_amount"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "crusher_on"         ; pset:value 0    ] ,
+        [ lv2:symbol "crusher_bits"       ; pset:value 16   ] ,
+        [ lv2:symbol "crusher_rate"       ; pset:value 1.0  ] ,
+        [ lv2:symbol "sub_on"             ; pset:value 0    ] ,
+        [ lv2:symbol "sub_level"          ; pset:value 0.5  ] .
 
 <https://github.com/hotspoons/autovocoder#preset/ominous_dim7>
     a pset:Preset ;
@@ -194,18 +375,38 @@
     rdfs:comment "Fixed diminished-7th at E2. Horror-film menace — sit below a whispered vocal." ;
     lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
-        [ lv2:symbol "mode"           ; pset:value 3    ] ,
-        [ lv2:symbol "fixed_note"     ; pset:value 40   ] ,
-        [ lv2:symbol "scale"          ; pset:value 0    ] ,
-        [ lv2:symbol "scale_root"     ; pset:value 0    ] ,
-        [ lv2:symbol "mix"            ; pset:value 1.0  ] ,
-        [ lv2:symbol "portamento"     ; pset:value 25.0 ] ,
-        [ lv2:symbol "carrier_level"  ; pset:value 0.5  ] ,
-        [ lv2:symbol "input_gain"     ; pset:value 9.0  ] ,
-        [ lv2:symbol "output_gain"    ; pset:value 6.0  ] ,
-        [ lv2:symbol "comp_on"        ; pset:value 1    ] ,
-        [ lv2:symbol "comp_threshold" ; pset:value -18.0 ] ,
-        [ lv2:symbol "chord_type"     ; pset:value 10   ] .
+        [ lv2:symbol "mode"               ; pset:value 3    ] ,
+        [ lv2:symbol "fixed_note"         ; pset:value 40   ] ,
+        [ lv2:symbol "scale"              ; pset:value 0    ] ,
+        [ lv2:symbol "scale_root"         ; pset:value 0    ] ,
+        [ lv2:symbol "mix"                ; pset:value 1.0  ] ,
+        [ lv2:symbol "portamento"         ; pset:value 25.0 ] ,
+        [ lv2:symbol "carrier_level"      ; pset:value 0.5  ] ,
+        [ lv2:symbol "input_gain"         ; pset:value 9.0  ] ,
+        [ lv2:symbol "output_gain"        ; pset:value 6.0  ] ,
+        [ lv2:symbol "comp_on"            ; pset:value 1    ] ,
+        [ lv2:symbol "comp_threshold"     ; pset:value -18.0 ] ,
+        [ lv2:symbol "chord_type"         ; pset:value 10   ] ,
+        [ lv2:symbol "pitch_algo"         ; pset:value 1    ] ,
+        [ lv2:symbol "carrier_chorus_on"  ; pset:value 0    ] ,
+        [ lv2:symbol "output_chorus_on"   ; pset:value 0    ] ,
+        [ lv2:symbol "chorus_rate"        ; pset:value 0.7  ] ,
+        [ lv2:symbol "chorus_depth"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "chorus_mix"         ; pset:value 0.5  ] ,
+        [ lv2:symbol "trem_on"            ; pset:value 0    ] ,
+        [ lv2:symbol "trem_rate"          ; pset:value 5.0  ] ,
+        [ lv2:symbol "trem_depth"         ; pset:value 0.7  ] ,
+        [ lv2:symbol "trem_shape"         ; pset:value 0.0  ] ,
+        [ lv2:symbol "trem_target"        ; pset:value 0    ] ,
+        [ lv2:symbol "pre_drive_on"       ; pset:value 0    ] ,
+        [ lv2:symbol "post_drive_on"      ; pset:value 0    ] ,
+        [ lv2:symbol "drive_mode"         ; pset:value 1    ] ,
+        [ lv2:symbol "drive_amount"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "crusher_on"         ; pset:value 0    ] ,
+        [ lv2:symbol "crusher_bits"       ; pset:value 16   ] ,
+        [ lv2:symbol "crusher_rate"       ; pset:value 1.0  ] ,
+        [ lv2:symbol "sub_on"             ; pset:value 0    ] ,
+        [ lv2:symbol "sub_level"          ; pset:value 0.5  ] .
 
 <https://github.com/hotspoons/autovocoder#preset/power_chord_robot>
     a pset:Preset ;
@@ -213,18 +414,38 @@
     rdfs:comment "Fixed power chord at A1. Rock-metal robot; no third means it fits over any tonality." ;
     lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
-        [ lv2:symbol "mode"           ; pset:value 3    ] ,
-        [ lv2:symbol "fixed_note"     ; pset:value 33   ] ,
-        [ lv2:symbol "scale"          ; pset:value 0    ] ,
-        [ lv2:symbol "scale_root"     ; pset:value 0    ] ,
-        [ lv2:symbol "mix"            ; pset:value 1.0  ] ,
-        [ lv2:symbol "portamento"     ; pset:value 20.0 ] ,
-        [ lv2:symbol "carrier_level"  ; pset:value 0.7  ] ,
-        [ lv2:symbol "input_gain"     ; pset:value 12.0 ] ,
-        [ lv2:symbol "output_gain"    ; pset:value 9.0  ] ,
-        [ lv2:symbol "comp_on"        ; pset:value 1    ] ,
-        [ lv2:symbol "comp_threshold" ; pset:value -18.0 ] ,
-        [ lv2:symbol "chord_type"     ; pset:value 0    ] .
+        [ lv2:symbol "mode"               ; pset:value 3    ] ,
+        [ lv2:symbol "fixed_note"         ; pset:value 33   ] ,
+        [ lv2:symbol "scale"              ; pset:value 0    ] ,
+        [ lv2:symbol "scale_root"         ; pset:value 0    ] ,
+        [ lv2:symbol "mix"                ; pset:value 1.0  ] ,
+        [ lv2:symbol "portamento"         ; pset:value 20.0 ] ,
+        [ lv2:symbol "carrier_level"      ; pset:value 0.7  ] ,
+        [ lv2:symbol "input_gain"         ; pset:value 12.0 ] ,
+        [ lv2:symbol "output_gain"        ; pset:value 9.0  ] ,
+        [ lv2:symbol "comp_on"            ; pset:value 1    ] ,
+        [ lv2:symbol "comp_threshold"     ; pset:value -18.0 ] ,
+        [ lv2:symbol "chord_type"         ; pset:value 0    ] ,
+        [ lv2:symbol "pitch_algo"         ; pset:value 1    ] ,
+        [ lv2:symbol "carrier_chorus_on"  ; pset:value 0    ] ,
+        [ lv2:symbol "output_chorus_on"   ; pset:value 0    ] ,
+        [ lv2:symbol "chorus_rate"        ; pset:value 0.7  ] ,
+        [ lv2:symbol "chorus_depth"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "chorus_mix"         ; pset:value 0.5  ] ,
+        [ lv2:symbol "trem_on"            ; pset:value 0    ] ,
+        [ lv2:symbol "trem_rate"          ; pset:value 5.0  ] ,
+        [ lv2:symbol "trem_depth"         ; pset:value 0.7  ] ,
+        [ lv2:symbol "trem_shape"         ; pset:value 0.0  ] ,
+        [ lv2:symbol "trem_target"        ; pset:value 0    ] ,
+        [ lv2:symbol "pre_drive_on"       ; pset:value 0    ] ,
+        [ lv2:symbol "post_drive_on"      ; pset:value 0    ] ,
+        [ lv2:symbol "drive_mode"         ; pset:value 1    ] ,
+        [ lv2:symbol "drive_amount"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "crusher_on"         ; pset:value 0    ] ,
+        [ lv2:symbol "crusher_bits"       ; pset:value 16   ] ,
+        [ lv2:symbol "crusher_rate"       ; pset:value 1.0  ] ,
+        [ lv2:symbol "sub_on"             ; pset:value 0    ] ,
+        [ lv2:symbol "sub_level"          ; pset:value 0.5  ] .
 
 <https://github.com/hotspoons/autovocoder#preset/heavy_glide>
     a pset:Preset ;
@@ -232,18 +453,38 @@
     rdfs:comment "Chromatic mono with a long portamento. Slurred, dub-style pitch smears between words." ;
     lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
-        [ lv2:symbol "mode"           ; pset:value 0    ] ,
-        [ lv2:symbol "fixed_note"     ; pset:value 48   ] ,
-        [ lv2:symbol "scale"          ; pset:value 0    ] ,
-        [ lv2:symbol "scale_root"     ; pset:value 0    ] ,
-        [ lv2:symbol "mix"            ; pset:value 1.0  ] ,
-        [ lv2:symbol "portamento"     ; pset:value 200.0 ] ,
-        [ lv2:symbol "carrier_level"  ; pset:value 0.6  ] ,
-        [ lv2:symbol "input_gain"     ; pset:value 9.0  ] ,
-        [ lv2:symbol "output_gain"    ; pset:value 6.0  ] ,
-        [ lv2:symbol "comp_on"        ; pset:value 1    ] ,
-        [ lv2:symbol "comp_threshold" ; pset:value -18.0 ] ,
-        [ lv2:symbol "chord_type"     ; pset:value 1    ] .
+        [ lv2:symbol "mode"               ; pset:value 0    ] ,
+        [ lv2:symbol "fixed_note"         ; pset:value 48   ] ,
+        [ lv2:symbol "scale"              ; pset:value 0    ] ,
+        [ lv2:symbol "scale_root"         ; pset:value 0    ] ,
+        [ lv2:symbol "mix"                ; pset:value 1.0  ] ,
+        [ lv2:symbol "portamento"         ; pset:value 200.0 ] ,
+        [ lv2:symbol "carrier_level"      ; pset:value 0.6  ] ,
+        [ lv2:symbol "input_gain"         ; pset:value 9.0  ] ,
+        [ lv2:symbol "output_gain"        ; pset:value 6.0  ] ,
+        [ lv2:symbol "comp_on"            ; pset:value 1    ] ,
+        [ lv2:symbol "comp_threshold"     ; pset:value -18.0 ] ,
+        [ lv2:symbol "chord_type"         ; pset:value 1    ] ,
+        [ lv2:symbol "pitch_algo"         ; pset:value 1    ] ,
+        [ lv2:symbol "carrier_chorus_on"  ; pset:value 0    ] ,
+        [ lv2:symbol "output_chorus_on"   ; pset:value 0    ] ,
+        [ lv2:symbol "chorus_rate"        ; pset:value 0.7  ] ,
+        [ lv2:symbol "chorus_depth"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "chorus_mix"         ; pset:value 0.5  ] ,
+        [ lv2:symbol "trem_on"            ; pset:value 0    ] ,
+        [ lv2:symbol "trem_rate"          ; pset:value 5.0  ] ,
+        [ lv2:symbol "trem_depth"         ; pset:value 0.7  ] ,
+        [ lv2:symbol "trem_shape"         ; pset:value 0.0  ] ,
+        [ lv2:symbol "trem_target"        ; pset:value 0    ] ,
+        [ lv2:symbol "pre_drive_on"       ; pset:value 0    ] ,
+        [ lv2:symbol "post_drive_on"      ; pset:value 0    ] ,
+        [ lv2:symbol "drive_mode"         ; pset:value 1    ] ,
+        [ lv2:symbol "drive_amount"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "crusher_on"         ; pset:value 0    ] ,
+        [ lv2:symbol "crusher_bits"       ; pset:value 16   ] ,
+        [ lv2:symbol "crusher_rate"       ; pset:value 1.0  ] ,
+        [ lv2:symbol "sub_on"             ; pset:value 0    ] ,
+        [ lv2:symbol "sub_level"          ; pset:value 0.5  ] .
 
 <https://github.com/hotspoons/autovocoder#preset/subtle_support>
     a pset:Preset ;
@@ -251,18 +492,38 @@
     rdfs:comment "Chromatic mono, 30% wet — layered under a real vocal. Low output gain so it tucks in." ;
     lv2:appliesTo <https://github.com/hotspoons/autovocoder> ;
     lv2:port
-        [ lv2:symbol "mode"           ; pset:value 0    ] ,
-        [ lv2:symbol "fixed_note"     ; pset:value 48   ] ,
-        [ lv2:symbol "scale"          ; pset:value 0    ] ,
-        [ lv2:symbol "scale_root"     ; pset:value 0    ] ,
-        [ lv2:symbol "mix"            ; pset:value 0.3  ] ,
-        [ lv2:symbol "portamento"     ; pset:value 15.0 ] ,
-        [ lv2:symbol "carrier_level"  ; pset:value 0.6  ] ,
-        [ lv2:symbol "input_gain"     ; pset:value 6.0  ] ,
-        [ lv2:symbol "output_gain"    ; pset:value 3.0  ] ,
-        [ lv2:symbol "comp_on"        ; pset:value 1    ] ,
-        [ lv2:symbol "comp_threshold" ; pset:value -18.0 ] ,
-        [ lv2:symbol "chord_type"     ; pset:value 1    ] .
+        [ lv2:symbol "mode"               ; pset:value 0    ] ,
+        [ lv2:symbol "fixed_note"         ; pset:value 48   ] ,
+        [ lv2:symbol "scale"              ; pset:value 0    ] ,
+        [ lv2:symbol "scale_root"         ; pset:value 0    ] ,
+        [ lv2:symbol "mix"                ; pset:value 0.3  ] ,
+        [ lv2:symbol "portamento"         ; pset:value 15.0 ] ,
+        [ lv2:symbol "carrier_level"      ; pset:value 0.6  ] ,
+        [ lv2:symbol "input_gain"         ; pset:value 6.0  ] ,
+        [ lv2:symbol "output_gain"        ; pset:value 3.0  ] ,
+        [ lv2:symbol "comp_on"            ; pset:value 1    ] ,
+        [ lv2:symbol "comp_threshold"     ; pset:value -18.0 ] ,
+        [ lv2:symbol "chord_type"         ; pset:value 1    ] ,
+        [ lv2:symbol "pitch_algo"         ; pset:value 1    ] ,
+        [ lv2:symbol "carrier_chorus_on"  ; pset:value 0    ] ,
+        [ lv2:symbol "output_chorus_on"   ; pset:value 0    ] ,
+        [ lv2:symbol "chorus_rate"        ; pset:value 0.7  ] ,
+        [ lv2:symbol "chorus_depth"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "chorus_mix"         ; pset:value 0.5  ] ,
+        [ lv2:symbol "trem_on"            ; pset:value 0    ] ,
+        [ lv2:symbol "trem_rate"          ; pset:value 5.0  ] ,
+        [ lv2:symbol "trem_depth"         ; pset:value 0.7  ] ,
+        [ lv2:symbol "trem_shape"         ; pset:value 0.0  ] ,
+        [ lv2:symbol "trem_target"        ; pset:value 0    ] ,
+        [ lv2:symbol "pre_drive_on"       ; pset:value 0    ] ,
+        [ lv2:symbol "post_drive_on"      ; pset:value 0    ] ,
+        [ lv2:symbol "drive_mode"         ; pset:value 1    ] ,
+        [ lv2:symbol "drive_amount"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "crusher_on"         ; pset:value 0    ] ,
+        [ lv2:symbol "crusher_bits"       ; pset:value 16   ] ,
+        [ lv2:symbol "crusher_rate"       ; pset:value 1.0  ] ,
+        [ lv2:symbol "sub_on"             ; pset:value 0    ] ,
+        [ lv2:symbol "sub_level"          ; pset:value 0.5  ] .
 
 # ============================================================================
 #  Effect showcases — chorus + tremolo applied for character.
@@ -295,7 +556,17 @@
         [ lv2:symbol "trem_on"            ; pset:value 1    ] ,
         [ lv2:symbol "trem_rate"          ; pset:value 8.0  ] ,
         [ lv2:symbol "trem_depth"         ; pset:value 1.0  ] ,
-        [ lv2:symbol "trem_shape"         ; pset:value 1.0  ] .
+        [ lv2:symbol "trem_shape"         ; pset:value 1.0  ] ,
+        [ lv2:symbol "trem_target"        ; pset:value 0    ] ,
+        [ lv2:symbol "pre_drive_on"       ; pset:value 0    ] ,
+        [ lv2:symbol "post_drive_on"      ; pset:value 0    ] ,
+        [ lv2:symbol "drive_mode"         ; pset:value 1    ] ,
+        [ lv2:symbol "drive_amount"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "crusher_on"         ; pset:value 0    ] ,
+        [ lv2:symbol "crusher_bits"       ; pset:value 16   ] ,
+        [ lv2:symbol "crusher_rate"       ; pset:value 1.0  ] ,
+        [ lv2:symbol "sub_on"             ; pset:value 0    ] ,
+        [ lv2:symbol "sub_level"          ; pset:value 0.5  ] .
 
 <https://github.com/hotspoons/autovocoder#preset/liquid_carrier>
     a pset:Preset ;
@@ -324,7 +595,17 @@
         [ lv2:symbol "trem_on"            ; pset:value 0    ] ,
         [ lv2:symbol "trem_rate"          ; pset:value 5.0  ] ,
         [ lv2:symbol "trem_depth"         ; pset:value 0.7  ] ,
-        [ lv2:symbol "trem_shape"         ; pset:value 0.0  ] .
+        [ lv2:symbol "trem_shape"         ; pset:value 0.0  ] ,
+        [ lv2:symbol "trem_target"        ; pset:value 0    ] ,
+        [ lv2:symbol "pre_drive_on"       ; pset:value 0    ] ,
+        [ lv2:symbol "post_drive_on"      ; pset:value 0    ] ,
+        [ lv2:symbol "drive_mode"         ; pset:value 1    ] ,
+        [ lv2:symbol "drive_amount"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "crusher_on"         ; pset:value 0    ] ,
+        [ lv2:symbol "crusher_bits"       ; pset:value 16   ] ,
+        [ lv2:symbol "crusher_rate"       ; pset:value 1.0  ] ,
+        [ lv2:symbol "sub_on"             ; pset:value 0    ] ,
+        [ lv2:symbol "sub_level"          ; pset:value 0.5  ] .
 
 <https://github.com/hotspoons/autovocoder#preset/wormhole>
     a pset:Preset ;
@@ -353,7 +634,17 @@
         [ lv2:symbol "trem_on"            ; pset:value 0    ] ,
         [ lv2:symbol "trem_rate"          ; pset:value 5.0  ] ,
         [ lv2:symbol "trem_depth"         ; pset:value 0.7  ] ,
-        [ lv2:symbol "trem_shape"         ; pset:value 0.0  ] .
+        [ lv2:symbol "trem_shape"         ; pset:value 0.0  ] ,
+        [ lv2:symbol "trem_target"        ; pset:value 0    ] ,
+        [ lv2:symbol "pre_drive_on"       ; pset:value 0    ] ,
+        [ lv2:symbol "post_drive_on"      ; pset:value 0    ] ,
+        [ lv2:symbol "drive_mode"         ; pset:value 1    ] ,
+        [ lv2:symbol "drive_amount"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "crusher_on"         ; pset:value 0    ] ,
+        [ lv2:symbol "crusher_bits"       ; pset:value 16   ] ,
+        [ lv2:symbol "crusher_rate"       ; pset:value 1.0  ] ,
+        [ lv2:symbol "sub_on"             ; pset:value 0    ] ,
+        [ lv2:symbol "sub_level"          ; pset:value 0.5  ] .
 
 <https://github.com/hotspoons/autovocoder#preset/helicopter>
     a pset:Preset ;
@@ -382,7 +673,17 @@
         [ lv2:symbol "trem_on"            ; pset:value 1    ] ,
         [ lv2:symbol "trem_rate"          ; pset:value 14.0 ] ,
         [ lv2:symbol "trem_depth"         ; pset:value 1.0  ] ,
-        [ lv2:symbol "trem_shape"         ; pset:value 1.0  ] .
+        [ lv2:symbol "trem_shape"         ; pset:value 1.0  ] ,
+        [ lv2:symbol "trem_target"        ; pset:value 0    ] ,
+        [ lv2:symbol "pre_drive_on"       ; pset:value 0    ] ,
+        [ lv2:symbol "post_drive_on"      ; pset:value 0    ] ,
+        [ lv2:symbol "drive_mode"         ; pset:value 1    ] ,
+        [ lv2:symbol "drive_amount"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "crusher_on"         ; pset:value 0    ] ,
+        [ lv2:symbol "crusher_bits"       ; pset:value 16   ] ,
+        [ lv2:symbol "crusher_rate"       ; pset:value 1.0  ] ,
+        [ lv2:symbol "sub_on"             ; pset:value 0    ] ,
+        [ lv2:symbol "sub_level"          ; pset:value 0.5  ] .
 
 <https://github.com/hotspoons/autovocoder#preset/trance_gate_c>
     a pset:Preset ;
@@ -411,7 +712,17 @@
         [ lv2:symbol "trem_on"            ; pset:value 1    ] ,
         [ lv2:symbol "trem_rate"          ; pset:value 6.0  ] ,
         [ lv2:symbol "trem_depth"         ; pset:value 0.85 ] ,
-        [ lv2:symbol "trem_shape"         ; pset:value 0.85 ] .
+        [ lv2:symbol "trem_shape"         ; pset:value 0.85 ] ,
+        [ lv2:symbol "trem_target"        ; pset:value 0    ] ,
+        [ lv2:symbol "pre_drive_on"       ; pset:value 0    ] ,
+        [ lv2:symbol "post_drive_on"      ; pset:value 0    ] ,
+        [ lv2:symbol "drive_mode"         ; pset:value 1    ] ,
+        [ lv2:symbol "drive_amount"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "crusher_on"         ; pset:value 0    ] ,
+        [ lv2:symbol "crusher_bits"       ; pset:value 16   ] ,
+        [ lv2:symbol "crusher_rate"       ; pset:value 1.0  ] ,
+        [ lv2:symbol "sub_on"             ; pset:value 0    ] ,
+        [ lv2:symbol "sub_level"          ; pset:value 0.5  ] .
 
 <https://github.com/hotspoons/autovocoder#preset/synthwave_pad>
     a pset:Preset ;
@@ -440,7 +751,17 @@
         [ lv2:symbol "trem_on"            ; pset:value 0    ] ,
         [ lv2:symbol "trem_rate"          ; pset:value 5.0  ] ,
         [ lv2:symbol "trem_depth"         ; pset:value 0.7  ] ,
-        [ lv2:symbol "trem_shape"         ; pset:value 0.0  ] .
+        [ lv2:symbol "trem_shape"         ; pset:value 0.0  ] ,
+        [ lv2:symbol "trem_target"        ; pset:value 0    ] ,
+        [ lv2:symbol "pre_drive_on"       ; pset:value 0    ] ,
+        [ lv2:symbol "post_drive_on"      ; pset:value 0    ] ,
+        [ lv2:symbol "drive_mode"         ; pset:value 1    ] ,
+        [ lv2:symbol "drive_amount"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "crusher_on"         ; pset:value 0    ] ,
+        [ lv2:symbol "crusher_bits"       ; pset:value 16   ] ,
+        [ lv2:symbol "crusher_rate"       ; pset:value 1.0  ] ,
+        [ lv2:symbol "sub_on"             ; pset:value 0    ] ,
+        [ lv2:symbol "sub_level"          ; pset:value 0.5  ] .
 
 <https://github.com/hotspoons/autovocoder#preset/megatron>
     a pset:Preset ;
@@ -469,7 +790,17 @@
         [ lv2:symbol "trem_on"            ; pset:value 1    ] ,
         [ lv2:symbol "trem_rate"          ; pset:value 3.0  ] ,
         [ lv2:symbol "trem_depth"         ; pset:value 0.8  ] ,
-        [ lv2:symbol "trem_shape"         ; pset:value 0.7  ] .
+        [ lv2:symbol "trem_shape"         ; pset:value 0.7  ] ,
+        [ lv2:symbol "trem_target"        ; pset:value 0    ] ,
+        [ lv2:symbol "pre_drive_on"       ; pset:value 0    ] ,
+        [ lv2:symbol "post_drive_on"      ; pset:value 0    ] ,
+        [ lv2:symbol "drive_mode"         ; pset:value 1    ] ,
+        [ lv2:symbol "drive_amount"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "crusher_on"         ; pset:value 0    ] ,
+        [ lv2:symbol "crusher_bits"       ; pset:value 16   ] ,
+        [ lv2:symbol "crusher_rate"       ; pset:value 1.0  ] ,
+        [ lv2:symbol "sub_on"             ; pset:value 0    ] ,
+        [ lv2:symbol "sub_level"          ; pset:value 0.5  ] .
 
 <https://github.com/hotspoons/autovocoder#preset/robotic_telegraph>
     a pset:Preset ;
@@ -498,7 +829,17 @@
         [ lv2:symbol "trem_on"            ; pset:value 1    ] ,
         [ lv2:symbol "trem_rate"          ; pset:value 10.0 ] ,
         [ lv2:symbol "trem_depth"         ; pset:value 0.7  ] ,
-        [ lv2:symbol "trem_shape"         ; pset:value 0.9  ] .
+        [ lv2:symbol "trem_shape"         ; pset:value 0.9  ] ,
+        [ lv2:symbol "trem_target"        ; pset:value 0    ] ,
+        [ lv2:symbol "pre_drive_on"       ; pset:value 0    ] ,
+        [ lv2:symbol "post_drive_on"      ; pset:value 0    ] ,
+        [ lv2:symbol "drive_mode"         ; pset:value 1    ] ,
+        [ lv2:symbol "drive_amount"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "crusher_on"         ; pset:value 0    ] ,
+        [ lv2:symbol "crusher_bits"       ; pset:value 16   ] ,
+        [ lv2:symbol "crusher_rate"       ; pset:value 1.0  ] ,
+        [ lv2:symbol "sub_on"             ; pset:value 0    ] ,
+        [ lv2:symbol "sub_level"          ; pset:value 0.5  ] .
 
 <https://github.com/hotspoons/autovocoder#preset/tron_cycle>
     a pset:Preset ;
@@ -527,7 +868,17 @@
         [ lv2:symbol "trem_on"            ; pset:value 1    ] ,
         [ lv2:symbol "trem_rate"          ; pset:value 1.2  ] ,
         [ lv2:symbol "trem_depth"         ; pset:value 0.4  ] ,
-        [ lv2:symbol "trem_shape"         ; pset:value 0.0  ] .
+        [ lv2:symbol "trem_shape"         ; pset:value 0.0  ] ,
+        [ lv2:symbol "trem_target"        ; pset:value 0    ] ,
+        [ lv2:symbol "pre_drive_on"       ; pset:value 0    ] ,
+        [ lv2:symbol "post_drive_on"      ; pset:value 0    ] ,
+        [ lv2:symbol "drive_mode"         ; pset:value 1    ] ,
+        [ lv2:symbol "drive_amount"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "crusher_on"         ; pset:value 0    ] ,
+        [ lv2:symbol "crusher_bits"       ; pset:value 16   ] ,
+        [ lv2:symbol "crusher_rate"       ; pset:value 1.0  ] ,
+        [ lv2:symbol "sub_on"             ; pset:value 0    ] ,
+        [ lv2:symbol "sub_level"          ; pset:value 0.5  ] .
 
 <https://github.com/hotspoons/autovocoder#preset/vintage_choir_wash>
     a pset:Preset ;
@@ -556,7 +907,17 @@
         [ lv2:symbol "trem_on"            ; pset:value 0    ] ,
         [ lv2:symbol "trem_rate"          ; pset:value 5.0  ] ,
         [ lv2:symbol "trem_depth"         ; pset:value 0.7  ] ,
-        [ lv2:symbol "trem_shape"         ; pset:value 0.0  ] .
+        [ lv2:symbol "trem_shape"         ; pset:value 0.0  ] ,
+        [ lv2:symbol "trem_target"        ; pset:value 0    ] ,
+        [ lv2:symbol "pre_drive_on"       ; pset:value 0    ] ,
+        [ lv2:symbol "post_drive_on"      ; pset:value 0    ] ,
+        [ lv2:symbol "drive_mode"         ; pset:value 1    ] ,
+        [ lv2:symbol "drive_amount"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "crusher_on"         ; pset:value 0    ] ,
+        [ lv2:symbol "crusher_bits"       ; pset:value 16   ] ,
+        [ lv2:symbol "crusher_rate"       ; pset:value 1.0  ] ,
+        [ lv2:symbol "sub_on"             ; pset:value 0    ] ,
+        [ lv2:symbol "sub_level"          ; pset:value 0.5  ] .
 
 <https://github.com/hotspoons/autovocoder#preset/glitch_bot>
     a pset:Preset ;
@@ -585,7 +946,17 @@
         [ lv2:symbol "trem_on"            ; pset:value 1    ] ,
         [ lv2:symbol "trem_rate"          ; pset:value 3.5  ] ,
         [ lv2:symbol "trem_depth"         ; pset:value 0.9  ] ,
-        [ lv2:symbol "trem_shape"         ; pset:value 0.95 ] .
+        [ lv2:symbol "trem_shape"         ; pset:value 0.95 ] ,
+        [ lv2:symbol "trem_target"        ; pset:value 0    ] ,
+        [ lv2:symbol "pre_drive_on"       ; pset:value 0    ] ,
+        [ lv2:symbol "post_drive_on"      ; pset:value 0    ] ,
+        [ lv2:symbol "drive_mode"         ; pset:value 1    ] ,
+        [ lv2:symbol "drive_amount"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "crusher_on"         ; pset:value 0    ] ,
+        [ lv2:symbol "crusher_bits"       ; pset:value 16   ] ,
+        [ lv2:symbol "crusher_rate"       ; pset:value 1.0  ] ,
+        [ lv2:symbol "sub_on"             ; pset:value 0    ] ,
+        [ lv2:symbol "sub_level"          ; pset:value 0.5  ] .
 
 <https://github.com/hotspoons/autovocoder#preset/cyberbird>
     a pset:Preset ;
@@ -614,4 +985,14 @@
         [ lv2:symbol "trem_on"            ; pset:value 1    ] ,
         [ lv2:symbol "trem_rate"          ; pset:value 5.0  ] ,
         [ lv2:symbol "trem_depth"         ; pset:value 0.3  ] ,
-        [ lv2:symbol "trem_shape"         ; pset:value 0.0  ] .
+        [ lv2:symbol "trem_shape"         ; pset:value 0.0  ] ,
+        [ lv2:symbol "trem_target"        ; pset:value 0    ] ,
+        [ lv2:symbol "pre_drive_on"       ; pset:value 0    ] ,
+        [ lv2:symbol "post_drive_on"      ; pset:value 0    ] ,
+        [ lv2:symbol "drive_mode"         ; pset:value 1    ] ,
+        [ lv2:symbol "drive_amount"       ; pset:value 0.5  ] ,
+        [ lv2:symbol "crusher_on"         ; pset:value 0    ] ,
+        [ lv2:symbol "crusher_bits"       ; pset:value 16   ] ,
+        [ lv2:symbol "crusher_rate"       ; pset:value 1.0  ] ,
+        [ lv2:symbol "sub_on"             ; pset:value 0    ] ,
+        [ lv2:symbol "sub_level"          ; pset:value 0.5  ] .
